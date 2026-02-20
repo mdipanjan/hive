@@ -11,6 +11,8 @@ import (
 )
 
 type Model struct {
+	width    int
+	height   int
 	sessions []session.Session
 	cursor   int
 	viewMode string
@@ -51,7 +53,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.sessions = sessions
 		return m, tea.ClearScreen
-
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		return m, nil
 	case tea.KeyMsg:
 		logger.Log.Debug("key pressed", "key", msg.String())
 		switch msg.String() {

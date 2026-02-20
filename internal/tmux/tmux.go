@@ -3,6 +3,7 @@ package tmux
 import (
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func List() ([]session.Session, error) {
-	cmd := exec.Command("tmux", "list-sessions")
+	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_created}|#{session_activity}")
 	output, err := cmd.Output()
 
 	logger.Log.Debug("tmux list-sessions", "output", string(output), "err", err)
@@ -27,12 +28,20 @@ func List() ([]session.Session, error) {
 		if line == "" {
 			continue
 		}
-		name := strings.TrimSpace(strings.Split(line, ":")[0])
+		parts := strings.Split(line, "|")
+		if len(parts) < 3 {
+			continue
+		}
+
+		name := parts[0]
+		created, _ := strconv.ParseInt(parts[1], 10, 64)
+		activity, _ := strconv.ParseInt(parts[2], 10, 64)
+
 		sessions = append(sessions, session.Session{
 			Name:         name,
 			Status:       session.StatusIdle,
-			CreatedAt:    time.Now(),
-			LastActivity: time.Now(),
+			CreatedAt:    time.Unix(created, 0),
+			LastActivity: time.Unix(activity, 0),
 		})
 	}
 
