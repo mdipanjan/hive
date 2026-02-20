@@ -1,20 +1,22 @@
 package tui
 
+import "github.com/mdipanjan/hive-v0/internal/styles"
+
 func RenderView(m Model) string {
 	var s string
 	// title
-	s += TitleStyle.Render("hive") + "\n"
+	s += styles.PanelTitle.Render("hive") + "\n"
 
 	for index, session := range m.sessions {
 		// Status icon
-		icon := StatusIdle
+		icon := styles.IconIdle
 		// Session name
 		line := icon + " " + session.Name
 		// Highlight if selected
 		if m.cursor == index {
-			line = SelectedStyle.Render(line + " ←")
+			line = styles.Selected.Render(line + " ←")
 		} else {
-			line = NormalStyle.Render(line)
+			line = styles.Normal.Render(line)
 		}
 		s += line + "\n"
 	}
@@ -24,7 +26,7 @@ func RenderView(m Model) string {
 	}
 
 	// 4. Help bar
-	s += HelpStyle.Render("\n  n: new   enter: attach   d: delete   q: quit")
+	s += styles.Help.Render("\n  n: new   enter: attach   d: delete   q: quit")
 
-	return BoxStyle.Render(s)
+	return styles.OuterBox.Render(s)
 }
