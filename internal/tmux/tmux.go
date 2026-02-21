@@ -12,7 +12,8 @@ import (
 )
 
 func List() ([]session.Session, error) {
-	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_created}|#{session_activity}")
+	// Get session info including path and current command (tool)
+	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_created}|#{session_activity}|#{session_attached}|#{session_path}|#{pane_current_command}")
 	output, err := cmd.Output()
 
 	logger.Log.Debug("tmux list-sessions", "output", string(output), "err", err)
@@ -29,17 +30,43 @@ func List() ([]session.Session, error) {
 			continue
 		}
 		parts := strings.Split(line, "|")
-		if len(parts) < 3 {
+		if len(parts) < 4 {
 			continue
 		}
 
 		name := parts[0]
 		created, _ := strconv.ParseInt(parts[1], 10, 64)
 		activity, _ := strconv.ParseInt(parts[2], 10, 64)
+		attached, _ := strconv.ParseInt(parts[3], 10, 64)
+
+		// Get path and tool if available
+		path := ""
+		tool := ""
+		if len(parts) >= 5 {
+			path = parts[4]
+		}
+		if len(parts) >= 6 {
+			tool = parts[5]
+		}
+
+		// Determine status
+		status := session.StatusIdle
+		if attached > 0 {
+			// Someone is attached to this session
+			status = session.StatusRunning
+		} else {
+			// Check if there was recent activity (within 5 minutes)
+			lastActivity := time.Unix(activity, 0)
+			if time.Since(lastActivity) < 5*time.Minute {
+				status = session.StatusWaiting
+			}
+		}
 
 		sessions = append(sessions, session.Session{
 			Name:         name,
-			Status:       session.StatusIdle,
+			Tool:         tool,
+			Path:         path,
+			Status:       status,
 			CreatedAt:    time.Unix(created, 0),
 			LastActivity: time.Unix(activity, 0),
 		})

@@ -1,18 +1,37 @@
 package components
 
 import (
+	"fmt"
+
 	"github.com/mdipanjan/hive-v0/internal/session"
 	"github.com/mdipanjan/hive-v0/internal/styles"
 )
 
-// RenderSessions returns the sessions list panel
+const (
+	maxNameLength      = 20
+	maxVisibleSessions = 6
+)
+
 func RenderSessions(sessions []session.Session, cursor int) string {
+	title := styles.PanelTitle.Render("SESSIONS") + "\n\n"
 	var s string
 
-	// Sessions list
-	for index, session := range sessions {
-		icon := styles.IconIdle
-		line := icon + " " + session.Name
+	if len(sessions) == 0 {
+		s = "  No sessions. Press 'n' to create one.\n"
+		return styles.Panel.Copy().Width(PanelWidth).Render(title + s)
+	}
+
+	start, end := calculateWindow(len(sessions), cursor, maxVisibleSessions)
+
+	if start > 0 {
+		s += styles.Dim.Render("  ▲ " + fmt.Sprintf("%d more", start)) + "\n"
+	}
+
+	for index := start; index < end; index++ {
+		sessionItem := sessions[index]
+		icon := GetStatusIcon(sessionItem.Status)
+		name := TruncateMiddle(sessionItem.Name, maxNameLength)
+		line := icon + " " + name
 
 		if cursor == index {
 			line = styles.Selected.Render(line + " ←")
@@ -22,11 +41,32 @@ func RenderSessions(sessions []session.Session, cursor int) string {
 		s += line + "\n"
 	}
 
-	// Empty state
-	if len(sessions) == 0 {
-		s = "  No sessions. Press 'n' to create one.\n"
+	if end < len(sessions) {
+		s += styles.Dim.Render("  ▼ " + fmt.Sprintf("%d more", len(sessions)-end)) + "\n"
 	}
 
-	// Wrap in bordered panel
-	return styles.Panel.Render(s)
+	return styles.Panel.Copy().Width(PanelWidth).Render(title + s)
 }
+
+func calculateWindow(total, cursor, maxVisible int) (int, int) {
+	if total <= maxVisible {
+		return 0, total
+	}
+
+	half := maxVisible / 2
+	start := cursor - half
+	end := cursor + half + (maxVisible % 2)
+
+	if start < 0 {
+		start = 0
+		end = maxVisible
+	}
+	if end > total {
+		end = total
+		start = total - maxVisible
+	}
+
+	return start, end
+}
+
+
