@@ -9,8 +9,11 @@ import (
 )
 
 func RenderView(m Model) string {
-	if m.PickingPath {
+	if m.isPickingPath {
 		return renderFilePickerView(m)
+	}
+	if m.isShowingHelp {
+		return renderHelpView(m)
 	}
 	if m.viewMode == "new" {
 		return renderNewView(m)
@@ -18,11 +21,22 @@ func RenderView(m Model) string {
 	return renderListView(m)
 }
 
+func renderHelpView(m Model) string {
+	popup := components.RenderHelpPopup()
+
+	if m.width > 0 && m.height > 0 {
+		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+	}
+
+	help := components.RenderHelp()
+	return popup + "\n" + help
+}
+
 func renderFilePickerView(m Model) string {
 	title := styles.PanelTitle.Render("SELECT DIRECTORY") + "\n\n"
 	picker := m.form.FilePicker.View()
 
-	panelStyle := styles.Panel.Copy().Width(50).Padding(1, 2)
+	panelStyle := styles.Panel.Width(50).Padding(1, 2)
 	panel := panelStyle.Render(title + picker)
 
 	if m.width > 0 && m.height > 0 {

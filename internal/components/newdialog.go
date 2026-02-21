@@ -39,7 +39,7 @@ func RenderNewDialog(tools []string, form FormData) string {
 
 	content.WriteString(renderButtons(form.Button, form.Focus == 3))
 
-	dialogStyle := styles.Panel.Copy().Width(70).Padding(1, 2)
+	dialogStyle := styles.Panel.Width(70).Padding(1, 2)
 	return dialogStyle.Render(content.String())
 }
 
@@ -100,7 +100,7 @@ func renderButtons(selected int, focused bool) string {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(styles.ColorGray)
 
-	cancelStyle := createStyle.Copy()
+	cancelStyle := createStyle
 
 	if focused {
 		if selected == 0 {

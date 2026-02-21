@@ -2,7 +2,6 @@ package components
 
 import "github.com/mdipanjan/hive-v0/internal/styles"
 
-// RenderLogo returns the ASCII art HIVE logo
 func RenderLogo() string {
 	logo := `██╗  ██╗██╗██╗   ██╗███████╗
 ██║  ██║██║██║   ██║██╔════╝

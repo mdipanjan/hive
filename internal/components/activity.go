@@ -32,7 +32,7 @@ func RenderActivity(width int, cpuHistory []int) string {
 		data = fakeData(innerWidth)
 	}
 
-	var sparkline string
+	var sb strings.Builder
 	for _, value := range data {
 		index := value * 7 / 100
 		if index > 7 {
@@ -41,9 +41,9 @@ func RenderActivity(width int, cpuHistory []int) string {
 		if index < 0 {
 			index = 0
 		}
-		sparkline += string(bars[index])
+		sb.WriteRune(bars[index])
 	}
-	sparkline = styles.Value.Render(sparkline)
+	sparkline := styles.Value.Render(sb.String())
 
 	cpuValue := data[len(data)-1]
 	cpuText := "cpu"
@@ -55,7 +55,7 @@ func RenderActivity(width int, cpuHistory []int) string {
 	cpuLabel := styles.Label.Render(cpuText) + strings.Repeat(" ", padding) + styles.Stats.Render(cpuPercent)
 
 	content := sparkline + "\n" + cpuLabel
-	return styles.Panel.Copy().Width(width).Render(content)
+	return styles.Panel.Width(width).Render(content)
 }
 
 func fakeData(length int) []int {

@@ -18,13 +18,13 @@ func RenderSessions(sessions []session.Session, cursor int) string {
 
 	if len(sessions) == 0 {
 		s = "  No sessions. Press 'n' to create one.\n"
-		return styles.Panel.Copy().Width(PanelWidth).Render(title + s)
+		return styles.Panel.Width(PanelWidth).Render(title + s)
 	}
 
 	start, end := calculateWindow(len(sessions), cursor, maxVisibleSessions)
 
 	if start > 0 {
-		s += styles.Dim.Render("  ▲ " + fmt.Sprintf("%d more", start)) + "\n"
+		s += styles.Dim.Render("  ▲ "+fmt.Sprintf("%d more", start)) + "\n"
 	}
 
 	for index := start; index < end; index++ {
@@ -42,10 +42,10 @@ func RenderSessions(sessions []session.Session, cursor int) string {
 	}
 
 	if end < len(sessions) {
-		s += styles.Dim.Render("  ▼ " + fmt.Sprintf("%d more", len(sessions)-end)) + "\n"
+		s += styles.Dim.Render("  ▼ "+fmt.Sprintf("%d more", len(sessions)-end)) + "\n"
 	}
 
-	return styles.Panel.Copy().Width(PanelWidth).Render(title + s)
+	return styles.Panel.Width(PanelWidth).Render(title + s)
 }
 
 func calculateWindow(total, cursor, maxVisible int) (int, int) {
@@ -68,5 +68,3 @@ func calculateWindow(total, cursor, maxVisible int) (int, int) {
 
 	return start, end
 }
-
-

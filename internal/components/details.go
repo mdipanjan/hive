@@ -22,7 +22,7 @@ func RenderDetails(s session.Session) string {
 		formatRow("CreatedAt", humanize.Time(s.CreatedAt)),
 		formatRow("LastActivity", humanize.Time(s.LastActivity)),
 	}
-	return styles.Panel.Copy().Width(PanelWidth).Render(title + strings.Join(rows, "\n"))
+	return styles.Panel.Width(PanelWidth).Render(title + strings.Join(rows, "\n"))
 }
 
 func formatRow(label, value string) string {

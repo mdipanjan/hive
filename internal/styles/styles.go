@@ -4,20 +4,22 @@ import "github.com/charmbracelet/lipgloss"
 
 // Theme defines a color scheme
 type Theme struct {
-	Name    string
-	Green   lipgloss.Color
-	Yellow  lipgloss.Color
-	Gray    lipgloss.Color
-	Cyan    lipgloss.Color
-	White   lipgloss.Color
-	Dim     lipgloss.Color
-	Bg      lipgloss.Color
-	BgDark  lipgloss.Color
+	Key    string
+	Name   string
+	Green  lipgloss.Color
+	Yellow lipgloss.Color
+	Gray   lipgloss.Color
+	Cyan   lipgloss.Color
+	White  lipgloss.Color
+	Dim    lipgloss.Color
+	Bg     lipgloss.Color
+	BgDark lipgloss.Color
 }
 
 // Available themes
 var (
 	TokyoNight = Theme{
+		Key:    "tokyo-night",
 		Name:   "Tokyo Night",
 		Green:  lipgloss.Color("#9ece6a"),
 		Yellow: lipgloss.Color("#e0af68"),
@@ -30,6 +32,7 @@ var (
 	}
 
 	Dracula = Theme{
+		Key:    "dracula",
 		Name:   "Dracula",
 		Green:  lipgloss.Color("#50fa7b"),
 		Yellow: lipgloss.Color("#f1fa8c"),
@@ -42,6 +45,7 @@ var (
 	}
 
 	Nord = Theme{
+		Key:    "nord",
 		Name:   "Nord",
 		Green:  lipgloss.Color("#a3be8c"),
 		Yellow: lipgloss.Color("#ebcb8b"),
@@ -54,6 +58,7 @@ var (
 	}
 
 	Gruvbox = Theme{
+		Key:    "gruvbox",
 		Name:   "Gruvbox",
 		Green:  lipgloss.Color("#b8bb26"),
 		Yellow: lipgloss.Color("#fabd2f"),
@@ -66,6 +71,7 @@ var (
 	}
 
 	Catppuccin = Theme{
+		Key:    "catppuccin",
 		Name:   "Catppuccin",
 		Green:  lipgloss.Color("#a6e3a1"),
 		Yellow: lipgloss.Color("#f9e2af"),
@@ -78,6 +84,7 @@ var (
 	}
 
 	TokyoStorm = Theme{
+		Key:    "tokyo-storm",
 		Name:   "Tokyo Storm",
 		Green:  lipgloss.Color("#9ece6a"),
 		Yellow: lipgloss.Color("#e0af68"),
@@ -90,6 +97,7 @@ var (
 	}
 
 	OneDark = Theme{
+		Key:    "one-dark",
 		Name:   "One Dark",
 		Green:  lipgloss.Color("#98c379"),
 		Yellow: lipgloss.Color("#e5c07b"),
@@ -102,6 +110,7 @@ var (
 	}
 
 	SolarizedDark = Theme{
+		Key:    "solarized-dark",
 		Name:   "Solarized Dark",
 		Green:  lipgloss.Color("#859900"),
 		Yellow: lipgloss.Color("#b58900"),
@@ -114,6 +123,7 @@ var (
 	}
 
 	GitHubDark = Theme{
+		Key:    "github-dark",
 		Name:   "GitHub Dark",
 		Green:  lipgloss.Color("#3fb950"),
 		Yellow: lipgloss.Color("#d29922"),
@@ -126,6 +136,7 @@ var (
 	}
 
 	RosePine = Theme{
+		Key:    "rose-pine",
 		Name:   "Rosé Pine",
 		Green:  lipgloss.Color("#9ccfd8"),
 		Yellow: lipgloss.Color("#f6c177"),
@@ -138,6 +149,7 @@ var (
 	}
 
 	Monokai = Theme{
+		Key:    "monokai",
 		Name:   "Monokai",
 		Green:  lipgloss.Color("#a6e22e"),
 		Yellow: lipgloss.Color("#e6db74"),
@@ -150,6 +162,7 @@ var (
 	}
 
 	ZincDark = Theme{
+		Key:    "zinc-dark",
 		Name:   "Zinc Dark",
 		Green:  lipgloss.Color("#4ade80"),
 		Yellow: lipgloss.Color("#facc15"),
@@ -294,6 +307,15 @@ func ApplyTheme(t Theme) {
 
 	Value = lipgloss.NewStyle().
 		Foreground(ColorWhite)
+}
+
+func GetThemeByKey(key string) Theme {
+	for _, theme := range Themes {
+		if theme.Key == key {
+			return theme
+		}
+	}
+	return TokyoNight
 }
 
 // Initialize with default theme

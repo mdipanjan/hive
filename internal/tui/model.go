@@ -9,13 +9,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive-v0/internal/components"
+	"github.com/mdipanjan/hive-v0/internal/config"
 	"github.com/mdipanjan/hive-v0/internal/logger"
 	"github.com/mdipanjan/hive-v0/internal/session"
 	"github.com/mdipanjan/hive-v0/internal/styles"
 	"github.com/mdipanjan/hive-v0/internal/tmux"
 )
 
-var Tools = []string{"pi", "claude", "gemini", "opencode", "bash"}
+var Tools = []string{"pi", "claude", "bash"}
 
 const (
 	FocusTool = iota
@@ -40,7 +41,8 @@ type Model struct {
 	cursor          int
 	viewMode        string
 	form            NewSessionForm
-	PickingPath     bool
+	isPickingPath   bool
+	isShowingHelp   bool
 	cpuUsageHistory []int
 	err             error
 }
@@ -69,7 +71,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.PickingPath {
+	if m.isPickingPath {
 		return m.updateFilePicker(msg)
 	}
 
@@ -86,6 +88,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if m.isShowingHelp {
+			if msg.String() == "?" || msg.String() == "esc" {
+				m.isShowingHelp = false
+			}
+			return m, nil
+		}
 		if m.viewMode == "new" {
 			return m.updateNewForm(msg)
 		}
@@ -142,6 +150,10 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "t":
 		theme := styles.NextTheme()
 		logger.Log.Debug("theme switched", "theme", theme.Name)
+		config.Save(config.Config{Theme: theme.Key})
+
+	case "?":
+		m.isShowingHelp = true
 	}
 	return m, nil
 }
@@ -165,23 +177,19 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 
 	case "left":
-		if m.form.Focus == FocusTool {
+		switch m.form.Focus {
+		case FocusTool:
 			m.form.Tool = (m.form.Tool - 1 + len(Tools)) % len(Tools)
-		} else if m.form.Focus == FocusButtons {
+		case FocusButtons:
 			m.form.Button = 0
 		}
 
 	case "right":
-		if m.form.Focus == FocusTool {
+		switch m.form.Focus {
+		case FocusTool:
 			m.form.Tool = (m.form.Tool + 1) % len(Tools)
-		} else if m.form.Focus == FocusButtons {
+		case FocusButtons:
 			m.form.Button = 1
-		}
-
-	case "b":
-		if m.form.Focus == FocusPath {
-			m.PickingPath = true
-			return m, m.form.FilePicker.Init()
 		}
 
 	case "enter":
@@ -205,9 +213,15 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	default:
 		if len(key) == 1 {
-			if m.form.Focus == FocusPath {
+			switch m.form.Focus {
+			case FocusPath:
+				if key == "b" {
+					m.isPickingPath = true
+					return m, m.form.FilePicker.Init()
+				}
 				m.form.Path += key
-			} else if m.form.Focus == FocusName {
+			case FocusName:
+
 				m.form.Name += key
 			}
 		}
@@ -218,7 +232,7 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m Model) updateFilePicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
-		m.PickingPath = false
+		m.isPickingPath = false
 		return m, nil
 	}
 
@@ -227,7 +241,7 @@ func (m Model) updateFilePicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if didSelect, path := m.form.FilePicker.DidSelectFile(msg); didSelect {
 		m.form.Path = path
-		m.PickingPath = false
+		m.isPickingPath = false
 	}
 
 	return m, cmd
@@ -235,7 +249,7 @@ func (m Model) updateFilePicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func newForm() NewSessionForm {
 	return NewSessionForm{
-		Tool:   4,
+		Tool:   2, // default to bash
 		Path:   getDefaultPath(),
 		Name:   "",
 		Focus:  FocusTool,
