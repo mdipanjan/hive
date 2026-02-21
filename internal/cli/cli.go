@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -138,9 +139,7 @@ func runDelete(args []string) bool {
 func randomID(length int) string {
 	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, length)
-	f, _ := os.Open("/dev/urandom")
-	f.Read(b)
-	f.Close()
+	rand.Read(b)
 	for i := range b {
 		b[i] = chars[b[i]%byte(len(chars))]
 	}
