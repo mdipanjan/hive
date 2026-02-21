@@ -10,6 +10,17 @@ const (
 	StatusWaiting
 )
 
+func (s Status) String() string {
+	switch s {
+	case StatusRunning:
+		return "running"
+	case StatusWaiting:
+		return "waiting"
+	default:
+		return "idle"
+	}
+}
+
 type Session struct {
 	Name         string
 	Tool         string

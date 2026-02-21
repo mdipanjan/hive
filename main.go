@@ -5,6 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mdipanjan/hive-v0/internal/cli"
 	"github.com/mdipanjan/hive-v0/internal/components"
 	"github.com/mdipanjan/hive-v0/internal/config"
 	"github.com/mdipanjan/hive-v0/internal/styles"
@@ -21,6 +22,10 @@ func main() {
 			return
 		case "-h", "--help", "help":
 			printHelp()
+			return
+		}
+
+		if cli.Run(os.Args) {
 			return
 		}
 	}
@@ -42,14 +47,31 @@ func printHelp() {
 	fmt.Println(`hive - lightweight TUI for managing tmux sessions
 
 Usage:
-  hive              Start the TUI
-  hive -v           Show version
-  hive -h           Show this help
+  hive                              Start the TUI
+  hive -v, --version                Show version
+  hive -h, --help                   Show this help
 
-Keys:
+Commands:
+  hive list [--json]                List all sessions
+  hive create [options]             Create a new session
+      --tool <tool>                 Tool: pi, claude, bash (default: bash)
+      --path <path>                 Working directory (default: .)
+      --name <name>                 Session name (auto-generated if empty)
+  hive attach <name>                Attach to a session
+  hive delete <name>                Delete a session
+
+Aliases:
+  list   → ls
+  create → new
+  attach → a
+  delete → rm
+
+TUI Keys:
   n         New session
   enter     Attach to session
   d         Delete session
+  /         Search sessions
   t         Switch theme
+  ?         Help
   q         Quit`)
 }

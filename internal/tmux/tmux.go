@@ -12,7 +12,6 @@ import (
 )
 
 func List() ([]session.Session, error) {
-	// Get session info including path and current command (tool)
 	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_created}|#{session_activity}|#{session_attached}|#{session_path}|#{pane_current_command}")
 	output, err := cmd.Output()
 
@@ -39,7 +38,6 @@ func List() ([]session.Session, error) {
 		activity, _ := strconv.ParseInt(parts[2], 10, 64)
 		attached, _ := strconv.ParseInt(parts[3], 10, 64)
 
-		// Get path and tool if available
 		path := ""
 		tool := ""
 		if len(parts) >= 5 {
@@ -49,13 +47,10 @@ func List() ([]session.Session, error) {
 			tool = parts[5]
 		}
 
-		// Determine status
 		status := session.StatusIdle
 		if attached > 0 {
-			// Someone is attached to this session
 			status = session.StatusRunning
 		} else {
-			// Check if there was recent activity (within 5 minutes)
 			lastActivity := time.Unix(activity, 0)
 			if time.Since(lastActivity) < 5*time.Minute {
 				status = session.StatusWaiting

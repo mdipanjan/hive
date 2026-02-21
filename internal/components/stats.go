@@ -7,8 +7,6 @@ import (
 	"github.com/mdipanjan/hive-v0/internal/styles"
 )
 
-// RenderStats returns the agent statistics line
-// Format: ● 2  ◐ 1  ○ 3  │  6 sessions
 func RenderStats(sessions []session.Session) string {
 	var running, waiting, idle int
 

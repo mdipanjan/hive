@@ -10,6 +10,13 @@ var Version = "dev"
 
 func RenderHelp() string {
 	themeName := styles.GetCurrentTheme().Name
-	helpText := fmt.Sprintf("  n: new   enter: attach   d: delete   t: theme [%s]   ?: help   q: quit", themeName)
-	return styles.Help.Render(helpText)
+	return RenderHelpBar([]HelpItem{
+		{Key: "n", Desc: "new"},
+		{Key: "enter", Desc: "attach"},
+		{Key: "d", Desc: "delete"},
+		{Key: "/", Desc: "search"},
+		{Key: "t", Desc: fmt.Sprintf("theme [%s]", themeName)},
+		{Key: "?", Desc: "help"},
+		{Key: "q", Desc: "quit"},
+	})
 }

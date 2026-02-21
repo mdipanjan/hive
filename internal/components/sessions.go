@@ -29,16 +29,16 @@ func RenderSessions(sessions []session.Session, cursor int) string {
 
 	for index := start; index < end; index++ {
 		sessionItem := sessions[index]
-		icon := GetStatusIcon(sessionItem.Status)
 		name := TruncateMiddle(sessionItem.Name, maxNameLength)
-		line := icon + " " + name
 
 		if cursor == index {
-			line = styles.Selected.Render(line + " ←")
+			line := "● " + name
+			s += styles.Logo.Render(line) + "\n"
 		} else {
-			line = styles.Normal.Render(line)
+			icon := GetStatusIcon(sessionItem.Status)
+			line := icon + " " + name
+			s += styles.Normal.Render(line) + "\n"
 		}
-		s += line + "\n"
 	}
 
 	if end < len(sessions) {

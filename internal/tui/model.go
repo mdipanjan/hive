@@ -1,29 +1,35 @@
 package tui
 
 import (
-	"crypto/rand"
-	"os"
 	"time"
 
 	"github.com/charmbracelet/bubbles/filepicker"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive-v0/internal/components"
-	"github.com/mdipanjan/hive-v0/internal/config"
 	"github.com/mdipanjan/hive-v0/internal/logger"
 	"github.com/mdipanjan/hive-v0/internal/session"
-	"github.com/mdipanjan/hive-v0/internal/styles"
 	"github.com/mdipanjan/hive-v0/internal/tmux"
 )
 
-var Tools = []string{"pi", "claude", "bash"}
-
-const (
-	FocusTool = iota
-	FocusPath
-	FocusName
-	FocusButtons
-)
+type Model struct {
+	width              int
+	height             int
+	sessions           []session.Session
+	cursor             int
+	viewMode           string
+	form               NewSessionForm
+	isPickingPath      bool
+	isShowingHelp      bool
+	isSearching        bool
+	searchInput        textinput.Model
+	searchResults      []int
+	searchCursor       int
+	isConfirmingDelete bool
+	deleteButton       int
+	cpuUsageHistory    []int
+	err                error
+}
 
 type NewSessionForm struct {
 	Tool       int
@@ -32,19 +38,6 @@ type NewSessionForm struct {
 	Name       string
 	Focus      int
 	Button     int
-}
-
-type Model struct {
-	width           int
-	height          int
-	sessions        []session.Session
-	cursor          int
-	viewMode        string
-	form            NewSessionForm
-	isPickingPath   bool
-	isShowingHelp   bool
-	cpuUsageHistory []int
-	err             error
 }
 
 type cpuTickMsg time.Time
@@ -75,6 +68,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateFilePicker(msg)
 	}
 
+	if m.isSearching {
+		if _, ok := msg.(tea.KeyMsg); !ok {
+			var cmd tea.Cmd
+			m.searchInput, cmd = m.searchInput.Update(msg)
+			return m, cmd
+		}
+	}
+
 	switch msg := msg.(type) {
 	case sessionAttachedMsg:
 		logger.Log.Debug("returned from attach", "err", msg.err)
@@ -88,11 +89,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if m.isSearching {
+			return m.updateSearch(msg)
+		}
 		if m.isShowingHelp {
 			if msg.String() == "?" || msg.String() == "esc" {
 				m.isShowingHelp = false
 			}
 			return m, nil
+		}
+		if m.isConfirmingDelete {
+			return m.updateDeleteConfirm(msg)
 		}
 		if m.viewMode == "new" {
 			return m.updateNewForm(msg)
@@ -110,212 +117,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "ctrl+c", "q":
-		return m, tea.Quit
-
-	case "up", "k":
-		m.cursor = max(0, m.cursor-1)
-
-	case "down", "j":
-		m.cursor = min(len(m.sessions)-1, m.cursor+1)
-
-	case "enter":
-		if len(m.sessions) > 0 {
-			name := m.sessions[m.cursor].Name
-			logger.Log.Debug("attaching to session", "name", name)
-			c := tmux.AttachCmd(name)
-			return m, tea.ExecProcess(c, func(err error) tea.Msg {
-				return sessionAttachedMsg{err}
-			})
-		}
-
-	case "n":
-		m.viewMode = "new"
-		m.form = newForm()
-		m.form.FilePicker = newFilePicker()
-
-	case "d":
-		if len(m.sessions) > 0 {
-			name := m.sessions[m.cursor].Name
-			logger.Log.Debug("deleting session", "name", name)
-			tmux.Kill(name)
-			m.sessions, _ = tmux.List()
-			if m.cursor >= len(m.sessions) {
-				m.cursor = max(0, len(m.sessions)-1)
-			}
-		}
-
-	case "t":
-		theme := styles.NextTheme()
-		logger.Log.Debug("theme switched", "theme", theme.Name)
-		config.Save(config.Config{Theme: theme.Key})
-
-	case "?":
-		m.isShowingHelp = true
-	}
-	return m, nil
-}
-
-func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	key := msg.String()
-
-	switch key {
-	case "esc":
-		m.viewMode = "list"
-		return m, nil
-
-	case "tab", "down":
-		if m.form.Focus < FocusButtons {
-			m.form.Focus++
-		}
-
-	case "shift+tab", "up":
-		if m.form.Focus > FocusTool {
-			m.form.Focus--
-		}
-
-	case "left":
-		switch m.form.Focus {
-		case FocusTool:
-			m.form.Tool = (m.form.Tool - 1 + len(Tools)) % len(Tools)
-		case FocusButtons:
-			m.form.Button = 0
-		}
-
-	case "right":
-		switch m.form.Focus {
-		case FocusTool:
-			m.form.Tool = (m.form.Tool + 1) % len(Tools)
-		case FocusButtons:
-			m.form.Button = 1
-		}
-
-	case "enter":
-		if m.form.Focus == FocusButtons {
-			if m.form.Button == 1 {
-				m.viewMode = "list"
-				return m, nil
-			}
-			return m.createSession()
-		}
-		if m.form.Focus < FocusButtons {
-			m.form.Focus++
-		}
-
-	case "backspace":
-		if m.form.Focus == FocusPath && len(m.form.Path) > 0 {
-			m.form.Path = m.form.Path[:len(m.form.Path)-1]
-		} else if m.form.Focus == FocusName && len(m.form.Name) > 0 {
-			m.form.Name = m.form.Name[:len(m.form.Name)-1]
-		}
-
-	default:
-		if len(key) == 1 {
-			switch m.form.Focus {
-			case FocusPath:
-				if key == "b" {
-					m.isPickingPath = true
-					return m, m.form.FilePicker.Init()
-				}
-				m.form.Path += key
-			case FocusName:
-
-				m.form.Name += key
-			}
-		}
-	}
-
-	return m, nil
-}
-
-func (m Model) updateFilePicker(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
-		m.isPickingPath = false
-		return m, nil
-	}
-
-	var cmd tea.Cmd
-	m.form.FilePicker, cmd = m.form.FilePicker.Update(msg)
-
-	if didSelect, path := m.form.FilePicker.DidSelectFile(msg); didSelect {
-		m.form.Path = path
-		m.isPickingPath = false
-	}
-
-	return m, cmd
-}
-
-func newForm() NewSessionForm {
-	return NewSessionForm{
-		Tool:   2, // default to bash
-		Path:   getDefaultPath(),
-		Name:   "",
-		Focus:  FocusTool,
-		Button: 0,
-	}
-}
-
-func newFilePicker() filepicker.Model {
-	fp := filepicker.New()
-	fp.DirAllowed = true
-	fp.FileAllowed = false
-	fp.ShowPermissions = false
-	fp.ShowSize = false
-	fp.ShowHidden = false
-	fp.Height = 15
-	fp.CurrentDirectory, _ = os.UserHomeDir()
-
-	fp.Styles.Cursor = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-	fp.Styles.Directory = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-	fp.Styles.File = lipgloss.NewStyle().Foreground(styles.ColorWhite)
-	fp.Styles.Selected = lipgloss.NewStyle().Foreground(styles.ColorGreen).Bold(true)
-
-	return fp
-}
-
-func (m Model) createSession() (tea.Model, tea.Cmd) {
-	tool := Tools[m.form.Tool]
-	path := components.ExpandPath(m.form.Path)
-	name := m.form.Name
-
-	if name == "" {
-		name = "hive-" + generateID(6)
-	}
-
-	logger.Log.Debug("creating session", "name", name, "tool", tool, "path", path)
-	tmux.Create(name, tool, path)
-
-	m.sessions, _ = tmux.List()
-	m.viewMode = "list"
-	return m, nil
-}
-
 func (m Model) View() string {
 	return RenderView(m)
-}
-
-func getDefaultPath() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		return "~"
-	}
-	return dir
-}
-
-func generateID(length int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, length)
-	rand.Read(b)
-	for i := range b {
-		b[i] = chars[b[i]%byte(len(chars))]
-	}
-	return string(b)
-}
-
-func cpuTick() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return cpuTickMsg(t)
-	})
 }

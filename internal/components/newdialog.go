@@ -3,7 +3,6 @@ package components
 import (
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive-v0/internal/styles"
 )
 
@@ -26,7 +25,7 @@ func RenderNewDialog(tools []string, form FormData) string {
 	content.WriteString(toolLabel + toolValue + "\n\n")
 
 	pathLabel := styles.Label.Render("PATH")
-	pathValue := renderTextInput(form.Path, form.Focus == 1)
+	pathValue := RenderTextInput(form.Path, form.Focus == 1, 30)
 	content.WriteString(pathLabel + pathValue + "\n\n")
 
 	nameLabel := styles.Label.Render("NAME")
@@ -34,10 +33,10 @@ func RenderNewDialog(tools []string, form FormData) string {
 	if namePlaceholder == "" {
 		namePlaceholder = "(auto-generate)"
 	}
-	nameValue := renderTextInput(namePlaceholder, form.Focus == 2)
+	nameValue := RenderTextInput(namePlaceholder, form.Focus == 2, 30)
 	content.WriteString(nameLabel + nameValue + "\n\n")
 
-	content.WriteString(renderButtons(form.Button, form.Focus == 3))
+	content.WriteString(RenderButtons([]string{"Create", "Cancel"}, form.Button, form.Focus == 3, 70))
 
 	dialogStyle := styles.Panel.Width(70).Padding(1, 2)
 	return dialogStyle.Render(content.String())
@@ -64,61 +63,4 @@ func renderToolSelector(tools []string, selected int, focused bool) string {
 	}
 
 	return strings.Join(parts, "  ")
-}
-
-func renderTextInput(value string, focused bool) string {
-	width := 30
-	displayValue := value
-
-	if len(displayValue) < width {
-		displayValue = displayValue + strings.Repeat(" ", width-len(displayValue))
-	} else if len(displayValue) > width {
-		displayValue = displayValue[:width]
-	}
-
-	inputStyle := lipgloss.NewStyle().Foreground(styles.ColorWhite)
-
-	if focused {
-		inputStyle = inputStyle.Background(styles.ColorDim).Bold(true)
-		if len(value) < width {
-			displayValue = value + "█" + strings.Repeat(" ", width-len(value)-1)
-		}
-	}
-
-	text := inputStyle.Render(displayValue)
-	underline := styles.Dim.Render(strings.Repeat("─", width))
-
-	return text + "\n" + strings.Repeat(" ", 10) + underline
-}
-
-func renderButtons(selected int, focused bool) string {
-	createBtn := "  Create  "
-	cancelBtn := "  Cancel  "
-
-	createStyle := lipgloss.NewStyle().
-		Foreground(styles.ColorWhite).
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(styles.ColorGray)
-
-	cancelStyle := createStyle
-
-	if focused {
-		if selected == 0 {
-			createStyle = createStyle.
-				Background(styles.ColorCyan).
-				BorderForeground(styles.ColorCyan).
-				Bold(true)
-		} else {
-			cancelStyle = cancelStyle.
-				Background(styles.ColorGray).
-				BorderForeground(styles.ColorWhite).
-				Bold(true)
-		}
-	}
-
-	create := createStyle.Render(createBtn)
-	cancel := cancelStyle.Render(cancelBtn)
-
-	buttons := lipgloss.JoinHorizontal(lipgloss.Center, create, "  ", cancel)
-	return lipgloss.PlaceHorizontal(70, lipgloss.Center, buttons)
 }

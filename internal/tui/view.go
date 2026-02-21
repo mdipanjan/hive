@@ -15,10 +15,37 @@ func RenderView(m Model) string {
 	if m.isShowingHelp {
 		return renderHelpView(m)
 	}
+	if m.isConfirmingDelete {
+		return renderDeleteConfirmView(m)
+	}
 	if m.viewMode == "new" {
 		return renderNewView(m)
 	}
+	if m.isSearching {
+		return renderSearchView(m)
+	}
 	return renderListView(m)
+}
+
+func renderDeleteConfirmView(m Model) string {
+	sessionName := ""
+	if len(m.sessions) > 0 {
+		sessionName = m.sessions[m.cursor].Name
+	}
+
+	popup := components.RenderDeleteConfirm(sessionName, m.deleteButton)
+
+	if m.width > 0 && m.height > 0 {
+		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+	}
+
+	help := components.RenderHelpBar([]components.HelpItem{
+		{Key: "←→", Desc: "select"},
+		{Key: "enter", Desc: "confirm"},
+		{Key: "y", Desc: "yes"},
+		{Key: "n/esc", Desc: "cancel"},
+	})
+	return popup + "\n" + help
 }
 
 func renderHelpView(m Model) string {
@@ -43,10 +70,26 @@ func renderFilePickerView(m Model) string {
 		panel = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, panel)
 	}
 
-	help := styles.Help.Render("  ↑↓: navigate   enter: select/open   esc: cancel")
+	help := components.RenderHelpBar([]components.HelpItem{
+		{Key: "↑↓", Desc: "navigate"},
+		{Key: "enter", Desc: "select"},
+		{Key: "esc", Desc: "cancel"},
+	})
 	return panel + "\n" + help
 }
 
+func renderSearchView(m Model) string {
+	popup := components.RenderSearchPopup(m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
+	help := components.RenderHelpBar([]components.HelpItem{
+		{Key: "↑↓", Desc: "select"},
+		{Key: "enter", Desc: "attach"},
+		{Key: "esc", Desc: "close"},
+	})
+	if m.width > 0 && m.height > 0 {
+		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+	}
+	return popup + "\n" + help
+}
 func renderListView(m Model) string {
 	leftColumn := lipgloss.JoinVertical(lipgloss.Left,
 		components.RenderLogo(),
@@ -99,7 +142,12 @@ func renderNewView(m Model) string {
 		dialog = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, dialog)
 	}
 
-	help := styles.Help.Render("  tab: next   ←→: select   enter: confirm   esc: cancel")
+	help := components.RenderHelpBar([]components.HelpItem{
+		{Key: "tab", Desc: "next"},
+		{Key: "←→", Desc: "select"},
+		{Key: "enter", Desc: "confirm"},
+		{Key: "esc", Desc: "cancel"},
+	})
 	return dialog + "\n" + help
 }
 
