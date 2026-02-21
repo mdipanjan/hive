@@ -3,7 +3,7 @@ package components
 import (
 	"strings"
 
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 type FormData struct {

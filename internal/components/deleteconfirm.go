@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 func RenderDeleteConfirm(sessionName string, selectedButton int) string {

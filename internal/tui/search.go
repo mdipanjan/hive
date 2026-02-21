@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mdipanjan/hive-v0/internal/logger"
-	"github.com/mdipanjan/hive-v0/internal/tmux"
+	"github.com/mdipanjan/hive/internal/logger"
+	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 func (m Model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {

@@ -1,6 +1,6 @@
 package components
 
-import "github.com/mdipanjan/hive-v0/internal/styles"
+import "github.com/mdipanjan/hive/internal/styles"
 
 func RenderLogo() string {
 	logo := `██╗  ██╗██╗██╗   ██╗███████╗

@@ -7,7 +7,7 @@ A lightweight TUI for managing tmux sessions, optimized for AI coding agents.
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 <p align="center">
-  <img src="docs/demo.gif" alt="Hive Demo" width="700">
+  <img src="assets/demo.gif" alt="Hive Demo" width="700">
 </p>
 
 ## Why Hive?
@@ -31,30 +31,34 @@ Managing multiple AI coding agents (Claude, Pi, Cursor) across projects gets mes
 ## Requirements
 
 - **tmux** - Terminal multiplexer
-- **Go 1.21+** - For building from source
-
-```bash
-# Check if tmux is installed
-tmux -V
-```
 
 ## Installation
 
-### From Source
+**Works on:** macOS, Linux
 
 ```bash
-git clone https://github.com/mdipanjan/hive-v0.git
-cd hive-v0
+curl -fsSL https://raw.githubusercontent.com/mdipanjan/hive/main/install.sh | bash
+```
+
+Then run: `hive`
+
+<details>
+<summary>Other install methods</summary>
+
+**From Source**
+```bash
+git clone https://github.com/mdipanjan/hive.git
+cd hive
 make build
-make install  # Installs to /usr/local/bin
+sudo mv hive /usr/local/bin/
 ```
 
-### Manual
-
+**Go**
 ```bash
-go build -o hive .
-mv hive /usr/local/bin/
+go install github.com/mdipanjan/hive@latest
 ```
+
+</details>
 
 ## Usage
 
@@ -150,7 +154,7 @@ Logs are written to `debug.log`.
 ## Project Structure
 
 ```
-hive-v0/
+hive/
   main.go
   internal/
     cli/          # CLI commands
@@ -161,7 +165,7 @@ hive-v0/
     styles/       # Themes & styles
     tmux/         # tmux operations
     tui/          # TUI logic
-  docs/
+  assets/         # Demo GIF
 ```
 
 ## Contributing

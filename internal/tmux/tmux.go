@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mdipanjan/hive-v0/internal/logger"
-	"github.com/mdipanjan/hive-v0/internal/session"
+	"github.com/mdipanjan/hive/internal/logger"
+	"github.com/mdipanjan/hive/internal/session"
 )
 
 func List() ([]session.Session, error) {

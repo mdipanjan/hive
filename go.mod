@@ -1,4 +1,4 @@
-module github.com/mdipanjan/hive-v0
+module github.com/mdipanjan/hive
 
 go 1.25.6
 

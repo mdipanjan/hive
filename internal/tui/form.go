@@ -6,10 +6,10 @@ import (
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mdipanjan/hive-v0/internal/components"
-	"github.com/mdipanjan/hive-v0/internal/logger"
-	"github.com/mdipanjan/hive-v0/internal/styles"
-	"github.com/mdipanjan/hive-v0/internal/tmux"
+	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/logger"
+	"github.com/mdipanjan/hive/internal/styles"
+	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 var Tools = []string{"pi", "claude", "bash"}

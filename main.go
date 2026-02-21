@@ -5,11 +5,11 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mdipanjan/hive-v0/internal/cli"
-	"github.com/mdipanjan/hive-v0/internal/components"
-	"github.com/mdipanjan/hive-v0/internal/config"
-	"github.com/mdipanjan/hive-v0/internal/styles"
-	"github.com/mdipanjan/hive-v0/internal/tui"
+	"github.com/mdipanjan/hive/internal/cli"
+	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/config"
+	"github.com/mdipanjan/hive/internal/styles"
+	"github.com/mdipanjan/hive/internal/tui"
 )
 
 var Version = "dev"

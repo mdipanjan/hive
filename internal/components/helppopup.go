@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 func RenderHelpPopup() string {

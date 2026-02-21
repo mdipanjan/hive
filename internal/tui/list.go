@@ -4,10 +4,10 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mdipanjan/hive-v0/internal/config"
-	"github.com/mdipanjan/hive-v0/internal/logger"
-	"github.com/mdipanjan/hive-v0/internal/styles"
-	"github.com/mdipanjan/hive-v0/internal/tmux"
+	"github.com/mdipanjan/hive/internal/config"
+	"github.com/mdipanjan/hive/internal/logger"
+	"github.com/mdipanjan/hive/internal/styles"
+	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {

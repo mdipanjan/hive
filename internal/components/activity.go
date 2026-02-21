@@ -8,7 +8,7 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 var bars = []rune{'▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'}

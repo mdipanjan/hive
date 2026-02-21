@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mdipanjan/hive-v0/internal/tmux"
+	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 type SessionOutput struct {

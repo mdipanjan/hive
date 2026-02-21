@@ -5,8 +5,8 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
-	"github.com/mdipanjan/hive-v0/internal/session"
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/session"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 const (

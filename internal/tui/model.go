@@ -6,10 +6,10 @@ import (
 	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mdipanjan/hive-v0/internal/components"
-	"github.com/mdipanjan/hive-v0/internal/logger"
-	"github.com/mdipanjan/hive-v0/internal/session"
-	"github.com/mdipanjan/hive-v0/internal/tmux"
+	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/logger"
+	"github.com/mdipanjan/hive/internal/session"
+	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 type Model struct {

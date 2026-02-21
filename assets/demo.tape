@@ -1,7 +1,7 @@
 # Hive Demo - VHS Tape
-# Run: vhs docs/demo.tape
+# Run: vhs assets/demo.tape
 
-Output docs/demo.gif
+Output assets/demo.gif
 
 Set FontSize 16
 Set Width 1200

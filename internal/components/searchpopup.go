@@ -3,8 +3,8 @@ package components
 import (
 	"fmt"
 
-	"github.com/mdipanjan/hive-v0/internal/session"
-	"github.com/mdipanjan/hive-v0/internal/styles"
+	"github.com/mdipanjan/hive/internal/session"
+	"github.com/mdipanjan/hive/internal/styles"
 )
 
 func RenderSearchPopup(inputView string, query string, sessions []session.Session, results []int, cursor int) string {
