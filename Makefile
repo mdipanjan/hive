@@ -1,5 +1,5 @@
 VERSION := 0.1.0
-BUILD_FLAGS := -ldflags "-X main.Version=$(VERSION)"
+BUILD_FLAGS := -ldflags "-s -w -X main.Version=$(VERSION)"
 CGO_FLAGS := CGO_CFLAGS="-w"
 
 .PHONY: build install clean run

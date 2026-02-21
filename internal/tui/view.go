@@ -34,28 +34,30 @@ func renderDeleteConfirmView(m Model) string {
 	}
 
 	popup := components.RenderDeleteConfirm(sessionName, m.deleteButton)
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-	}
-
 	help := components.RenderHelpBar([]components.HelpItem{
 		{Key: "←→", Desc: "select"},
 		{Key: "enter", Desc: "confirm"},
 		{Key: "y", Desc: "yes"},
 		{Key: "n/esc", Desc: "cancel"},
 	})
+
+	if m.width > 0 && m.height > 0 {
+		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+	}
+
 	return popup + "\n" + help
 }
 
 func renderHelpView(m Model) string {
 	popup := components.RenderHelpPopup()
+	help := components.RenderHelp()
 
 	if m.width > 0 && m.height > 0 {
 		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
 	}
 
-	help := components.RenderHelp()
 	return popup + "\n" + help
 }
 
@@ -65,16 +67,17 @@ func renderFilePickerView(m Model) string {
 
 	panelStyle := styles.Panel.Width(50).Padding(1, 2)
 	panel := panelStyle.Render(title + picker)
-
-	if m.width > 0 && m.height > 0 {
-		panel = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, panel)
-	}
-
 	help := components.RenderHelpBar([]components.HelpItem{
 		{Key: "↑↓", Desc: "navigate"},
 		{Key: "enter", Desc: "select"},
 		{Key: "esc", Desc: "cancel"},
 	})
+
+	if m.width > 0 && m.height > 0 {
+		panel = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, panel)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+	}
+
 	return panel + "\n" + help
 }
 
@@ -85,9 +88,12 @@ func renderSearchView(m Model) string {
 		{Key: "enter", Desc: "attach"},
 		{Key: "esc", Desc: "close"},
 	})
+
 	if m.width > 0 && m.height > 0 {
 		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
 	}
+
 	return popup + "\n" + help
 }
 func renderListView(m Model) string {
@@ -122,9 +128,15 @@ func renderListView(m Model) string {
 	fullContent := lipgloss.JoinVertical(lipgloss.Right, mainContent, "", activity)
 
 	boxStyle := styles.OuterBox.Width(boxWidth)
-	help := components.RenderHelp()
+	box := boxStyle.Render(fullContent)
 
-	return boxStyle.Render(fullContent) + "\n" + help
+	help := components.RenderHelp()
+	if m.width > 0 && m.height > 0 {
+		box = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, box)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+	}
+
+	return box + "\n" + help
 }
 
 func renderNewView(m Model) string {
@@ -137,17 +149,18 @@ func renderNewView(m Model) string {
 	}
 
 	dialog := components.RenderNewDialog(Tools, formData)
-
-	if m.width > 0 && m.height > 0 {
-		dialog = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, dialog)
-	}
-
 	help := components.RenderHelpBar([]components.HelpItem{
 		{Key: "tab", Desc: "next"},
 		{Key: "←→", Desc: "select"},
 		{Key: "enter", Desc: "confirm"},
 		{Key: "esc", Desc: "cancel"},
 	})
+
+	if m.width > 0 && m.height > 0 {
+		dialog = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, dialog)
+		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+	}
+
 	return dialog + "\n" + help
 }
 
