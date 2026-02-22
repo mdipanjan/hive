@@ -76,8 +76,14 @@ func Create(name, tool, path string) error {
 	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path, tool).Run()
 	if err != nil {
 		logger.Log.Error("tmux create failed", "err", err)
+		return err
 	}
-	return err
+
+	exec.Command("tmux", "set-option", "-t", name, "status", "off").Run()
+
+	exec.Command("tmux", "set-option", "-t", name, "mouse", "on").Run()
+
+	return nil
 }
 
 func Attach(name string) error {

@@ -20,13 +20,13 @@ Managing multiple AI coding agents (Claude, Pi, Cursor) across projects gets mes
 
 ## Features
 
-| Feature | What it solves |
-|---------|----------------|
-| **Unified Dashboard** | See all sessions at a glance - status, tool, path |
-| **Quick Search** | Find sessions instantly with `/` - no more `tmux ls` |
+| Feature               | What it solves                                        |
+| --------------------- | ----------------------------------------------------- |
+| **Unified Dashboard** | See all sessions at a glance - status, tool, path     |
+| **Quick Search**      | Find sessions instantly with `/` - no more `tmux ls`  |
 | **CLI + JSON Output** | AI agents can create/manage sessions programmatically |
-| **12 Themes** | Match your terminal aesthetic |
-| **Lightweight** | ~4MB binary, instant startup, no runtime deps |
+| **12 Themes**         | Match your terminal aesthetic                         |
+| **Lightweight**       | ~4MB binary, instant startup, no runtime deps         |
 
 ## Requirements
 
@@ -46,6 +46,7 @@ Then run: `hive`
 <summary>Other install methods</summary>
 
 **From Source**
+
 ```bash
 git clone https://github.com/mdipanjan/hive.git
 cd hive
@@ -54,6 +55,7 @@ sudo mv hive /usr/local/bin/
 ```
 
 **Go**
+
 ```bash
 go install github.com/mdipanjan/hive@latest
 ```
@@ -70,15 +72,15 @@ hive
 
 **Keyboard Shortcuts:**
 
-| Key | Action |
-|-----|--------|
-| `n` | New session |
+| Key     | Action            |
+| ------- | ----------------- |
+| `n`     | New session       |
 | `enter` | Attach to session |
-| `d` | Delete session |
-| `/` | Search sessions |
-| `t` | Cycle themes |
-| `?` | Help |
-| `q` | Quit |
+| `d`     | Delete session    |
+| `/`     | Search sessions   |
+| `t`     | Cycle themes      |
+| `?`     | Help              |
+| `q`     | Quit              |
 
 ### CLI Mode (AI-Agent Compatible)
 
@@ -98,6 +100,7 @@ hive delete my-session
 ```
 
 **Aliases:**
+
 - `list` / `ls`
 - `create` / `new`
 - `attach` / `a`
