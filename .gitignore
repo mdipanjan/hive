@@ -1,4 +1,5 @@
 *.log
 DEV.md
+DEV_INTERNAL.md
 dist/
 hive
