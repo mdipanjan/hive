@@ -92,6 +92,9 @@ hive list --json       # JSON output
 # Create session
 hive create --tool pi --path /projects/myapp --name my-session
 
+# Create Neovim + terminal split session
+hive create --tool nvim --path /projects/myapp --name my-editor
+
 # Attach to session
 hive attach my-session
 

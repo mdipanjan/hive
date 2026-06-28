@@ -12,7 +12,7 @@ import (
 	"github.com/mdipanjan/hive/internal/tmux"
 )
 
-var Tools = []string{"pi", "claude", "bash"}
+var Tools = []string{"pi", "claude", "nvim", "bash"}
 
 const (
 	FocusTool = iota
@@ -94,7 +94,7 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func newForm() NewSessionForm {
 	return NewSessionForm{
-		Tool:   2,
+		Tool:   3,
 		Path:   getDefaultPath(),
 		Name:   "",
 		Focus:  FocusTool,

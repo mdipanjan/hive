@@ -106,13 +106,18 @@ func renderListView(m Model) string {
 	)
 
 	var rightColumn string
+	cursor := m.cursor
+	if cursor >= len(m.sessions) {
+		cursor = max(0, len(m.sessions)-1)
+	}
+
 	if len(m.sessions) > 0 {
 		rightColumn = lipgloss.JoinVertical(lipgloss.Left,
-			components.RenderSessions(m.sessions, m.cursor),
-			components.RenderDetails(m.sessions[m.cursor]),
+			components.RenderSessions(m.sessions, cursor),
+			components.RenderDetails(m.sessions[cursor]),
 		)
 	} else {
-		rightColumn = components.RenderSessions(m.sessions, m.cursor)
+		rightColumn = components.RenderSessions(m.sessions, cursor)
 	}
 
 	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftColumn, "  ", rightColumn)

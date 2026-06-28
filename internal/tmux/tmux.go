@@ -73,17 +73,58 @@ func List() ([]session.Session, error) {
 
 func Create(name, tool, path string) error {
 	logger.Log.Debug("creating tmux session", "name", name, "tool", tool, "path", path)
+
+	if tool == "nvim" || tool == "vim" {
+		return createEditorSession(name, path)
+	}
+
 	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path, tool).Run()
 	if err != nil {
 		logger.Log.Error("tmux create failed", "err", err)
 		return err
 	}
 
-	exec.Command("tmux", "set-option", "-t", name, "status", "off").Run()
-
-	exec.Command("tmux", "set-option", "-t", name, "mouse", "on").Run()
-
+	configureSession(name)
 	return nil
+}
+
+func createEditorSession(name, path string) error {
+	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path).Run()
+	if err != nil {
+		logger.Log.Error("tmux editor session create failed", "err", err)
+		return err
+	}
+
+	commands := [][]string{
+		{"send-keys", "-t", name + ":0.0", "nvim .; tmux detach-client -s " + name, "C-m"},
+		{"split-window", "-h", "-p", "35", "-t", name + ":0", "-c", path},
+		{"select-pane", "-t", name + ":0.0"},
+	}
+
+	for _, args := range commands {
+		if err := exec.Command("tmux", args...).Run(); err != nil {
+			logger.Log.Error("tmux editor layout failed", "args", args, "err", err)
+			return err
+		}
+	}
+
+	configureSession(name)
+	return nil
+}
+
+func configureSession(name string) {
+	options := [][]string{
+		{"set-option", "-t", name, "status", "off"},
+		{"set-option", "-t", name, "mouse", "on"},
+		{"set-option", "-t", name, "pane-border-style", "fg=#45475a"},
+		{"set-option", "-t", name, "pane-active-border-style", "fg=#a6e3a1"},
+		{"set-option", "-t", name, "window-style", "bg=#1e1e2e"},
+		{"set-option", "-t", name, "window-active-style", "bg=#1e1e2e"},
+	}
+
+	for _, args := range options {
+		exec.Command("tmux", args...).Run()
+	}
 }
 
 func Attach(name string) error {
