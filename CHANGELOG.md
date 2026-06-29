@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.2
+
+- Added runtime state tracking for Hive sessions.
+- Added internal session runner.
+- Improved nvim session resume behavior.
+- Preserved original tool/path metadata for sessions.
+- Improved status labels: active, running, ready, completed, failed.
+
 ## 0.1.1
 
 - Fix directory browser when creating new sessions (press `b` on path field)
