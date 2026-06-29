@@ -8,25 +8,31 @@ import (
 )
 
 func RenderStats(sessions []session.Session) string {
-	var running, waiting, idle int
+	var active, running, ready, done, failed int
 
 	for _, s := range sessions {
 		switch s.Status {
+		case session.StatusActive:
+			active++
 		case session.StatusRunning:
 			running++
-		case session.StatusWaiting:
-			waiting++
-		case session.StatusIdle:
-			idle++
+		case session.StatusReady:
+			ready++
+		case session.StatusCompleted:
+			done++
+		case session.StatusFailed:
+			failed++
 		}
 	}
 
 	total := len(sessions)
 
-	stats := fmt.Sprintf("%s %d  %s %d  %s %d  │  %d sessions",
+	stats := fmt.Sprintf("%s %d  %s %d  %s %d  %s %d  %s %d  │  %d sessions",
+		styles.IconActive, active,
 		styles.IconRunning, running,
-		styles.IconWaiting, waiting,
-		styles.IconIdle, idle,
+		styles.IconReady, ready,
+		styles.IconCompleted, done,
+		styles.IconFailed, failed,
 		total,
 	)
 

@@ -41,22 +41,21 @@ func CollapsePath(path string) string {
 
 func GetStatusIcon(status session.Status) string {
 	switch status {
+	case session.StatusActive:
+		return styles.IconActive
 	case session.StatusRunning:
 		return styles.IconRunning
-	case session.StatusWaiting:
-		return styles.IconWaiting
+	case session.StatusReady:
+		return styles.IconReady
+	case session.StatusCompleted:
+		return styles.IconCompleted
+	case session.StatusFailed:
+		return styles.IconFailed
 	default:
 		return styles.IconIdle
 	}
 }
 
 func GetStatusText(status session.Status) string {
-	switch status {
-	case session.StatusRunning:
-		return styles.IconRunning + " running"
-	case session.StatusWaiting:
-		return styles.IconWaiting + " waiting"
-	default:
-		return styles.IconIdle + " idle"
-	}
+	return GetStatusIcon(status) + " " + status.String()
 }

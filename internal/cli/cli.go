@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mdipanjan/hive/internal/runner"
 	"github.com/mdipanjan/hive/internal/tmux"
 )
 
@@ -31,6 +32,8 @@ func Run(args []string) bool {
 		return runAttach(args[2:])
 	case "delete", "rm":
 		return runDelete(args[2:])
+	case "run-session":
+		return runSession(args[2:])
 	}
 
 	return false
@@ -133,6 +136,21 @@ func runDelete(args []string) bool {
 	}
 
 	fmt.Printf("Deleted session: %s\n", name)
+	return true
+}
+
+func runSession(args []string) bool {
+	fs := flag.NewFlagSet("run-session", flag.ExitOnError)
+	name := fs.String("name", "", "Session name")
+	tool := fs.String("tool", "", "Tool to run")
+	path := fs.String("path", "", "Working directory")
+	fs.Parse(args)
+
+	if err := runner.Run(runner.Options{Name: *name, Tool: *tool, Path: *path}); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
 	return true
 }
 

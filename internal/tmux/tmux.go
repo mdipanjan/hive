@@ -9,6 +9,7 @@ import (
 
 	"github.com/mdipanjan/hive/internal/logger"
 	"github.com/mdipanjan/hive/internal/session"
+	"github.com/mdipanjan/hive/internal/state"
 )
 
 func List() ([]session.Session, error) {
@@ -47,23 +48,26 @@ func List() ([]session.Session, error) {
 			tool = parts[5]
 		}
 
-		status := session.StatusIdle
-		if attached > 0 {
-			status = session.StatusRunning
-		} else {
-			lastActivity := time.Unix(activity, 0)
-			if time.Since(lastActivity) < 5*time.Minute {
-				status = session.StatusWaiting
-			}
+		createdAt := time.Unix(created, 0)
+		lastActivity := time.Unix(activity, 0)
+
+		meta, metaErr := state.ReadMetadata(name)
+		if metaErr == nil {
+			tool = meta.Tool
+			path = meta.Path
+			createdAt = meta.CreatedAt
 		}
+
+		runtime, runtimeErr := state.ReadRuntime(name)
+		status := statusFromRuntime(runtime, runtimeErr, attached, lastActivity)
 
 		sessions = append(sessions, session.Session{
 			Name:         name,
 			Tool:         tool,
 			Path:         path,
 			Status:       status,
-			CreatedAt:    time.Unix(created, 0),
-			LastActivity: time.Unix(activity, 0),
+			CreatedAt:    createdAt,
+			LastActivity: lastActivity,
 		})
 	}
 
@@ -71,14 +75,50 @@ func List() ([]session.Session, error) {
 	return sessions, nil
 }
 
+func statusFromRuntime(runtime state.Runtime, err error, attached int64, lastActivity time.Time) session.Status {
+	if attached > 0 {
+		return session.StatusActive
+	}
+
+	if err != nil {
+		if time.Since(lastActivity) < 5*time.Minute {
+			return session.StatusRunning
+		}
+		return session.StatusIdle
+	}
+
+	switch runtime.State {
+	case state.StateStarting, state.StateRunning:
+		return session.StatusRunning
+	case state.StateReady:
+		return session.StatusReady
+	case state.StateCompleted:
+		return session.StatusCompleted
+	case state.StateFailed:
+		return session.StatusFailed
+	case state.StateUnknown:
+		return session.StatusUnknown
+	default:
+		return session.StatusIdle
+	}
+}
+
 func Create(name, tool, path string) error {
 	logger.Log.Debug("creating tmux session", "name", name, "tool", tool, "path", path)
 
-	if tool == "nvim" || tool == "vim" {
-		return createEditorSession(name, path)
+	if err := state.WriteMetadata(state.Metadata{Name: name, Tool: tool, Path: path, CreatedAt: time.Now().UTC()}); err != nil {
+		return err
 	}
 
-	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path, tool).Run()
+	if err := state.WriteRuntime(name, state.Runtime{State: state.StateStarting, StartedAt: time.Now().UTC()}); err != nil {
+		return err
+	}
+
+	if tool == "nvim" || tool == "vim" {
+		return createEditorSession(name, tool, path)
+	}
+
+	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path, runnerCommand(name, tool, path)).Run()
 	if err != nil {
 		logger.Log.Error("tmux create failed", "err", err)
 		return err
@@ -88,8 +128,8 @@ func Create(name, tool, path string) error {
 	return nil
 }
 
-func createEditorSession(name, path string) error {
-	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path).Run()
+func createEditorSession(name, tool, path string) error {
+	err := exec.Command("tmux", "new-session", "-d", "-s", name, "-c", path, runnerCommand(name, tool, path)).Run()
 	if err != nil {
 		logger.Log.Error("tmux editor session create failed", "err", err)
 		return err
@@ -106,9 +146,25 @@ func createEditorSession(name, path string) error {
 	return nil
 }
 
+func runnerCommand(name, tool, path string) string {
+	executable, err := os.Executable()
+	if err != nil {
+		executable = "hive"
+	}
+
+	command := shellQuote(executable) + " run-session --name " + shellQuote(name) + " --tool " + shellQuote(tool) + " --path " + shellQuote(path)
+	if stateDir := os.Getenv("HIVE_STATE_DIR"); stateDir != "" {
+		command = "HIVE_STATE_DIR=" + shellQuote(stateDir) + " " + command
+	}
+	return command
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
+}
+
 func editorLayoutCommands(name, path string) [][]string {
 	return [][]string{
-		{"send-keys", "-t", name + ":0.0", "nvim .; tmux detach-client -s " + name, "C-m"},
 		{"split-window", "-h", "-p", "35", "-t", name + ":0", "-c", path},
 		{"select-pane", "-t", name + ":0.0"},
 	}
@@ -157,6 +213,12 @@ func Kill(name string) error {
 	err := exec.Command("tmux", "kill-session", "-t", name).Run()
 	if err != nil {
 		logger.Log.Error("tmux kill failed", "err", err)
+	}
+	if stateErr := state.DeleteSessionState(name); stateErr != nil {
+		logger.Log.Error("session state delete failed", "err", stateErr)
+		if err == nil {
+			err = stateErr
+		}
 	}
 	return err
 }

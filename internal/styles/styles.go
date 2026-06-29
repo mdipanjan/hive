@@ -14,9 +14,12 @@ var (
 )
 
 var (
-	IconRunning string
-	IconWaiting string
-	IconIdle    string
+	IconActive    string
+	IconRunning   string
+	IconReady     string
+	IconCompleted string
+	IconFailed    string
+	IconIdle      string
 )
 
 var (
@@ -45,8 +48,11 @@ func ApplyTheme(t Theme) {
 	ColorBg = t.Bg
 	ColorBgDark = t.BgDark
 
-	IconRunning = lipgloss.NewStyle().Foreground(ColorGreen).Render("●")
-	IconWaiting = lipgloss.NewStyle().Foreground(ColorYellow).Render("◐")
+	IconActive = lipgloss.NewStyle().Foreground(ColorGreen).Render("●")
+	IconRunning = lipgloss.NewStyle().Foreground(ColorYellow).Render("◐")
+	IconReady = lipgloss.NewStyle().Foreground(ColorCyan).Render("◌")
+	IconCompleted = lipgloss.NewStyle().Foreground(ColorGreen).Render("✓")
+	IconFailed = lipgloss.NewStyle().Foreground(ColorYellow).Render("✕")
 	IconIdle = lipgloss.NewStyle().Foreground(ColorGray).Render("○")
 
 	OuterBox = lipgloss.NewStyle().
