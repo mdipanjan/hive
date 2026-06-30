@@ -1,0 +1,20 @@
+{
+  // Lint rules. Formatting (line wrapping, spacing) is owned by Prettier, so
+  // rules that conflict with Prettier are disabled here.
+  "config": {
+    "default": true,
+    "MD013": false, // line-length — Prettier controls wrapping
+    "MD033": false, // inline HTML — README uses <p align="center"> etc.
+    "MD041": false, // first line in file must be a top-level heading
+    "MD036": false, // emphasis-as-heading — used intentionally for inline labels
+    "MD024": { "siblings_only": true }, // duplicate headings ok if not siblings
+    "MD029": { "style": "ordered" } // ordered list prefix style
+  },
+  "globs": ["**/*.md"],
+  "ignores": [
+    "node_modules",
+    "docs", // Jekyll site (Liquid templating)
+    ".pi",
+    "screenshots"
+  ]
+}

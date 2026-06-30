@@ -1,0 +1,13 @@
+# Generated / vendored
+node_modules/
+docs/_site/
+docs/.jekyll-cache/
+
+# Jekyll site sources contain Liquid templating prettier shouldn't touch
+docs/
+
+# Agent + tooling
+.pi/
+
+# Generated screenshot snapshots (raw ANSI, not prose)
+screenshots/

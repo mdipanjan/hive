@@ -3,3 +3,8 @@ DEV.md
 dev-docs/
 dist/
 hive
+.pi/SYSTEM.md
+
+# Rendered screenshot images are build artifacts; the .txt ANSI snapshots and
+# the generator (screenshot_test.go) are the source of truth and ARE tracked.
+screenshots/*.png

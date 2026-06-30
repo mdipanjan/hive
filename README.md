@@ -24,7 +24,7 @@ Managing multiple AI coding agents (Claude, Pi, Cursor) across projects gets mes
 | --------------------- | ----------------------------------------------------- |
 | **Unified Dashboard** | See all sessions at a glance - status, tool, path     |
 | **Quick Search**      | Find sessions instantly with `/` - no more `tmux ls`  |
-| **Instant Switcher**  | Jump between sessions with `prefix+h` - no detach      |
+| **Instant Switcher**  | Jump between sessions with `prefix+h` - no detach     |
 | **CLI + JSON Output** | AI agents can create/manage sessions programmatically |
 | **12 Themes**         | Match your terminal aesthetic                         |
 | **Lightweight**       | ~4MB binary, instant startup, no runtime deps         |
@@ -73,16 +73,16 @@ hive
 
 **Keyboard Shortcuts:**
 
-| Key     | Action            |
-| ------- | ----------------- |
-| `n`     | New session       |
-| `enter` | Attach to session |
+| Key          | Action                                          |
+| ------------ | ----------------------------------------------- |
+| `n`          | New session                                     |
+| `enter`      | Attach to session                               |
 | `prefix + h` | Open session switcher (from inside any session) |
-| `d`     | Delete session    |
-| `/`     | Search sessions   |
-| `t`     | Cycle themes      |
-| `?`     | Help              |
-| `q`     | Quit              |
+| `d`          | Delete session                                  |
+| `/`          | Search sessions                                 |
+| `t`          | Cycle themes                                    |
+| `?`          | Help                                            |
+| `q`          | Quit                                            |
 
 ### CLI Mode (AI-Agent Compatible)
 
@@ -141,7 +141,7 @@ Switch between sessions without leaving the one you're in.
 
 From inside any Hive-created tmux session, press:
 
-```
+```text
 prefix + h   (e.g. Ctrl+b h)
 ```
 
@@ -199,7 +199,7 @@ Logs are written to `debug.log`.
 
 ## Project Structure
 
-```
+```text
 hive/
   main.go
   internal/
