@@ -165,7 +165,7 @@ Logs are written to `debug.log`.
 
 ## Project Structure
 
-```
+```text
 hive/
   main.go
   internal/
