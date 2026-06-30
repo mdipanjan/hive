@@ -1,14 +1,9 @@
 package tui
 
 import (
-	"os"
-
-	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
-	"github.com/mdipanjan/hive/internal/styles"
 )
 
 var Tools = lifecycle.BuiltinTools
@@ -79,7 +74,8 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			case FocusPath:
 				if key == "b" {
 					m.app.PickPath()
-					return m, m.form.FilePicker.Init()
+					m.form.FilePicker = newFilePicker()
+					return m, nil
 				}
 				m.form.Path += key
 			case FocusName:
@@ -101,22 +97,8 @@ func newForm() NewSessionForm {
 	}
 }
 
-func newFilePicker() filepicker.Model {
-	fp := filepicker.New()
-	fp.DirAllowed = true
-	fp.FileAllowed = false
-	fp.ShowPermissions = false
-	fp.ShowSize = false
-	fp.ShowHidden = false
-	fp.Height = 15
-	fp.CurrentDirectory, _ = os.UserHomeDir()
-
-	fp.Styles.Cursor = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-	fp.Styles.Directory = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-	fp.Styles.File = lipgloss.NewStyle().Foreground(styles.ColorWhite)
-	fp.Styles.Selected = lipgloss.NewStyle().Foreground(styles.ColorGreen).Bold(true)
-
-	return fp
+func newFilePicker() dirPicker {
+	return newDirPicker(getDefaultPath())
 }
 
 func (m Model) createSession() (tea.Model, tea.Cmd) {

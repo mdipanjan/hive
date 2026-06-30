@@ -62,23 +62,14 @@ func renderHelpView(m Model) string {
 }
 
 func renderFilePickerView(m Model) string {
-	title := styles.PanelTitle.Render("SELECT DIRECTORY") + "\n\n"
-	picker := m.form.FilePicker.View()
-
-	panelStyle := styles.Panel.Width(50).Padding(1, 2)
-	panel := panelStyle.Render(title + picker)
-	help := components.RenderHelpBar([]components.HelpItem{
+	picker := m.form.FilePicker.view()
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "↑↓", Desc: "navigate"},
-		{Key: "enter", Desc: "select"},
+		{Key: "→", Desc: "open"},
+		{Key: "⏎", Desc: "select"},
 		{Key: "esc", Desc: "cancel"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		panel = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, panel)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return panel + "\n" + help
+	return renderChrome(m, picker, footer)
 }
 
 func renderSearchView(m Model) string {

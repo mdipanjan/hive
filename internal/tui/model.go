@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mdipanjan/hive/internal/components"
@@ -40,7 +39,7 @@ type Model struct {
 
 type NewSessionForm struct {
 	Tool       int
-	FilePicker filepicker.Model
+	FilePicker dirPicker
 	Path       string
 	Name       string
 	Focus      int

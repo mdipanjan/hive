@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/components"
 	"github.com/mdipanjan/hive/internal/session"
@@ -94,14 +93,7 @@ func TestGenerateScreenshots(t *testing.T) {
 			m := base()
 			m.app.StartNewSession()
 			m.form = newForm()
-			fp := newFilePicker()
-			fp, _ = fp.Update(tea.WindowSizeMsg{Width: w, Height: h})
-			if cmd := fp.Init(); cmd != nil {
-				if msg := cmd(); msg != nil {
-					fp, _ = fp.Update(msg)
-				}
-			}
-			m.form.FilePicker = fp
+			m.form.FilePicker = newDirPicker(os.Getenv("HOME"))
 			m.app.PickPath()
 			return m
 		}},
