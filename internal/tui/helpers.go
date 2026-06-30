@@ -13,6 +13,7 @@ import (
 func newSearchInput() textinput.Model {
 	in := textinput.New()
 	in.Placeholder = "Search..."
+	in.Prompt = "❯ "
 	in.Focus()
 	in.CharLimit = 30
 	in.Width = 30

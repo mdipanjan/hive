@@ -79,18 +79,12 @@ func renderSearchView(m Model) string {
 	}
 
 	popup := components.RenderSearchPopupTitled(title, m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
-	help := components.RenderHelpBar([]components.HelpItem{
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "↑↓", Desc: "select"},
-		{Key: "enter", Desc: action},
+		{Key: "⏎", Desc: action},
 		{Key: "esc", Desc: "close"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	return renderChrome(m, popup, footer)
 }
 func renderListView(m Model) string {
 	cursor := m.cursor
