@@ -6,13 +6,12 @@ import (
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
 	"github.com/mdipanjan/hive/internal/styles"
-	"github.com/mdipanjan/hive/internal/tmux"
 )
 
-var Tools = []string{"pi", "claude", "nvim", "bash"}
+var Tools = lifecycle.BuiltinTools
 
 const (
 	FocusTool = iota
@@ -26,7 +25,7 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	switch key {
 	case "esc":
-		m.viewMode = "list"
+		m.app.ReturnToSessionList()
 		return m, nil
 
 	case "tab", "down":
@@ -58,7 +57,7 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "enter":
 		if m.form.Focus == FocusButtons {
 			if m.form.Button == 1 {
-				m.viewMode = "list"
+				m.app.ReturnToSessionList()
 				return m, nil
 			}
 			return m.createSession()
@@ -79,7 +78,7 @@ func (m Model) updateNewForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			switch m.form.Focus {
 			case FocusPath:
 				if key == "b" {
-					m.isPickingPath = true
+					m.app.PickPath()
 					return m, m.form.FilePicker.Init()
 				}
 				m.form.Path += key
@@ -122,17 +121,18 @@ func newFilePicker() filepicker.Model {
 
 func (m Model) createSession() (tea.Model, tea.Cmd) {
 	tool := Tools[m.form.Tool]
-	path := components.ExpandPath(m.form.Path)
+	path := m.form.Path
 	name := m.form.Name
 
-	if name == "" {
-		name = "hive-" + generateID(6)
-	}
-
 	logger.Log.Debug("creating session", "name", name, "tool", tool, "path", path)
-	tmux.Create(name, tool, path)
+	createdName, err := lifecycle.New().Create(lifecycle.CreateRequest{Name: name, Tool: tool, Path: path})
+	if err != nil {
+		m.err = err
+		return m, nil
+	}
+	logger.Log.Debug("created session", "name", createdName)
 
-	m.sessions, _ = tmux.List()
-	m.viewMode = "list"
+	m.sessions, _ = lifecycle.New().List()
+	m.app.ReturnToSessionList()
 	return m, nil
 }

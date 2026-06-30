@@ -1,14 +1,13 @@
 package cli
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 
+	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/runner"
-	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 type SessionOutput struct {
@@ -44,7 +43,7 @@ func runList(args []string) bool {
 	jsonOutput := fs.Bool("json", false, "Output as JSON")
 	fs.Parse(args)
 
-	sessions, err := tmux.List()
+	sessions, err := lifecycle.New().List()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
@@ -83,21 +82,13 @@ func runCreate(args []string) bool {
 	name := fs.String("name", "", "Session name (auto-generated if empty)")
 	fs.Parse(args)
 
-	if *name == "" {
-		*name = "hive-" + randomID(6)
-	}
-
-	if *path == "." {
-		*path, _ = os.Getwd()
-	}
-
-	err := tmux.Create(*name, *tool, *path)
+	createdName, err := lifecycle.New().Create(lifecycle.CreateRequest{Name: *name, Tool: *tool, Path: *path})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Created session: %s\n", *name)
+	fmt.Printf("Created session: %s\n", createdName)
 	return true
 }
 
@@ -108,7 +99,7 @@ func runAttach(args []string) bool {
 	}
 
 	name := args[0]
-	cmd := tmux.AttachCmd(name)
+	cmd := lifecycle.New().AttachCmd(name)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -129,7 +120,7 @@ func runDelete(args []string) bool {
 	}
 
 	name := args[0]
-	err := tmux.Kill(name)
+	err := lifecycle.New().Delete(name)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
@@ -152,14 +143,4 @@ func runSession(args []string) bool {
 	}
 
 	return true
-}
-
-func randomID(length int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, length)
-	rand.Read(b)
-	for i := range b {
-		b[i] = chars[b[i]%byte(len(chars))]
-	}
-	return string(b)
 }

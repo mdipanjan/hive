@@ -9,19 +9,19 @@ import (
 )
 
 func RenderView(m Model) string {
-	if m.isPickingPath {
+	if m.app.PickingPath() {
 		return renderFilePickerView(m)
 	}
-	if m.isShowingHelp {
+	if m.app.ShowingHelp() {
 		return renderHelpView(m)
 	}
-	if m.isConfirmingDelete {
+	if m.app.ConfirmingDelete() {
 		return renderDeleteConfirmView(m)
 	}
-	if m.viewMode == "new" {
+	if m.app.CreatingSession() {
 		return renderNewView(m)
 	}
-	if m.isSearching {
+	if m.app.Searching() {
 		return renderSearchView(m)
 	}
 	return renderListView(m)
