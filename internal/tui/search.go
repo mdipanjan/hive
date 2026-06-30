@@ -4,14 +4,17 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
-	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 func (m Model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "esc":
-		m.isSearching = false
+		if m.mode == ModeSwitch {
+			return m, tea.Quit
+		}
+		m.app.CloseOverlay()
 		return m, nil
 
 	case "enter":
@@ -19,8 +22,8 @@ func (m Model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			idx := m.searchResults[m.searchCursor]
 			name := m.sessions[idx].Name
 			logger.Log.Debug("attaching to session from search", "name", name)
-			m.isSearching = false
-			c := tmux.AttachCmd(name)
+			m.app.CloseOverlay()
+			c := lifecycle.New().AttachCmd(name)
 			return m, tea.ExecProcess(c, func(err error) tea.Msg {
 				return sessionAttachedMsg{err}
 			})

@@ -9,19 +9,19 @@ import (
 )
 
 func RenderView(m Model) string {
-	if m.isPickingPath {
+	if m.app.PickingPath() {
 		return renderFilePickerView(m)
 	}
-	if m.isShowingHelp {
+	if m.app.ShowingHelp() {
 		return renderHelpView(m)
 	}
-	if m.isConfirmingDelete {
+	if m.app.ConfirmingDelete() {
 		return renderDeleteConfirmView(m)
 	}
-	if m.viewMode == "new" {
+	if m.app.CreatingSession() {
 		return renderNewView(m)
 	}
-	if m.isSearching {
+	if m.app.Searching() {
 		return renderSearchView(m)
 	}
 	return renderListView(m)
@@ -82,10 +82,17 @@ func renderFilePickerView(m Model) string {
 }
 
 func renderSearchView(m Model) string {
-	popup := components.RenderSearchPopup(m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
+	title := "SEARCH"
+	action := "attach"
+	if m.mode == ModeSwitch {
+		title = "SWITCH SESSION"
+		action = "switch"
+	}
+
+	popup := components.RenderSearchPopupTitled(title, m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
 	help := components.RenderHelpBar([]components.HelpItem{
 		{Key: "↑↓", Desc: "select"},
-		{Key: "enter", Desc: "attach"},
+		{Key: "enter", Desc: action},
 		{Key: "esc", Desc: "close"},
 	})
 

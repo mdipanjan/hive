@@ -3,11 +3,10 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/config"
+	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
 	"github.com/mdipanjan/hive/internal/styles"
-	"github.com/mdipanjan/hive/internal/tmux"
 )
 
 func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -25,20 +24,20 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if len(m.sessions) > 0 {
 			name := m.sessions[m.cursor].Name
 			logger.Log.Debug("attaching to session", "name", name)
-			c := tmux.AttachCmd(name)
+			c := lifecycle.New().AttachCmd(name)
 			return m, tea.ExecProcess(c, func(err error) tea.Msg {
 				return sessionAttachedMsg{err}
 			})
 		}
 
 	case "n":
-		m.viewMode = "new"
+		m.app.StartNewSession()
 		m.form = newForm()
 		m.form.FilePicker = newFilePicker()
 
 	case "d":
 		if len(m.sessions) > 0 {
-			m.isConfirmingDelete = true
+			m.app.ConfirmDelete()
 			m.deleteButton = 1
 		}
 
@@ -48,17 +47,11 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		config.Save(config.Config{Theme: theme.Key})
 
 	case "?":
-		m.isShowingHelp = true
+		m.app.ShowHelp()
 
 	case "/":
-		m.searchInput = textinput.New()
-		m.searchInput.Placeholder = "Search..."
-		m.searchInput.Focus()
-		m.searchInput.CharLimit = 30
-		m.searchInput.Width = 30
-		m.searchInput.PromptStyle = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-		m.searchInput.TextStyle = lipgloss.NewStyle().Foreground(styles.ColorWhite)
-		m.isSearching = true
+		m.searchInput = newSearchInput()
+		m.app.Search()
 		m.searchResults = m.getIndices("")
 		m.searchCursor = 0
 		return m, textinput.Blink

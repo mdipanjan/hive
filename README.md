@@ -7,7 +7,7 @@ A lightweight TUI for managing tmux sessions, optimized for AI coding agents.
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Hive Demo" width="700">
+  <img src="assets/demo.gif" alt="Hive Demot " width="700">
 </p>
 
 ## Why Hive?
@@ -24,6 +24,7 @@ Managing multiple AI coding agents (Claude, Pi, Cursor) across projects gets mes
 | --------------------- | ----------------------------------------------------- |
 | **Unified Dashboard** | See all sessions at a glance - status, tool, path     |
 | **Quick Search**      | Find sessions instantly with `/` - no more `tmux ls`  |
+| **Instant Switcher**  | Jump between sessions with `prefix+h` - no detach      |
 | **CLI + JSON Output** | AI agents can create/manage sessions programmatically |
 | **12 Themes**         | Match your terminal aesthetic                         |
 | **Lightweight**       | ~4MB binary, instant startup, no runtime deps         |
@@ -76,6 +77,7 @@ hive
 | ------- | ----------------- |
 | `n`     | New session       |
 | `enter` | Attach to session |
+| `prefix + h` | Open session switcher (from inside any session) |
 | `d`     | Delete session    |
 | `/`     | Search sessions   |
 | `t`     | Cycle themes      |
@@ -98,11 +100,15 @@ hive create --tool nvim --path /projects/myapp --name my-editor
 # In nvim sessions:
 # - left pane opens Neovim
 # - right pane stays as a shell
+# - prefix+h opens the Hive session switcher popup
 # - quitting Neovim detaches from tmux, but keeps the session alive
 # - attaching again opens Neovim again with the right shell preserved
 
 # Attach to session
 hive attach my-session
+
+# Open compact session switcher
+hive switch
 
 # Delete session
 hive delete my-session
@@ -113,6 +119,7 @@ hive delete my-session
 - `list` / `ls`
 - `create` / `new`
 - `attach` / `a`
+- `switch` / `sw` / `s`
 - `delete` / `rm`
 
 **JSON Output Example:**
@@ -127,6 +134,33 @@ hive delete my-session
   }
 ]
 ```
+
+## Session Switcher
+
+Switch between sessions without leaving the one you're in.
+
+From inside any Hive-created tmux session, press:
+
+```
+prefix + h   (e.g. Ctrl+b h)
+```
+
+This opens a centered switcher popup. Type to filter, `↑↓` to select, `enter`
+to switch, `esc` to close. Because Hive uses `tmux switch-client` under the
+hood, switching is instant - no detach/reattach cycle.
+
+You can also open it directly:
+
+```bash
+hive switch
+```
+
+> The `prefix + h` binding is installed automatically when Hive creates a
+> session. To add it to existing sessions, run:
+>
+> ```bash
+> tmux bind-key h display-popup -B -w 90% -h 80% -E "hive switch"
+> ```
 
 ## Configuration
 

@@ -49,6 +49,28 @@ func TestEditorLayoutCommands(t *testing.T) {
 	}
 }
 
+func TestSessionKeyBindingsOpenHiveSwitch(t *testing.T) {
+	got := sessionKeyBindings()
+
+	if len(got) != 1 {
+		t.Fatalf("sessionKeyBindings() returned %d bindings, want 1", len(got))
+	}
+
+	binding := got[0]
+	wantPrefix := []string{"bind-key", "h", "display-popup", "-B", "-w", "90%", "-h", "80%", "-E"}
+	if len(binding) != len(wantPrefix)+1 {
+		t.Fatalf("sessionKeyBindings()[0] = %#v, want %d args", binding, len(wantPrefix)+1)
+	}
+	for i, want := range wantPrefix {
+		if binding[i] != want {
+			t.Fatalf("sessionKeyBindings()[0] = %#v, arg %d want %q", binding, i, want)
+		}
+	}
+	if !strings.HasSuffix(binding[len(binding)-1], " switch") {
+		t.Fatalf("sessionKeyBindings()[0] command = %q, want hive switch command", binding[len(binding)-1])
+	}
+}
+
 func TestSessionOptions(t *testing.T) {
 	got := sessionOptions("work")
 	want := [][]string{

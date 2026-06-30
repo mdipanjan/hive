@@ -174,6 +174,23 @@ func configureSession(name string) {
 	for _, args := range sessionOptions(name) {
 		exec.Command("tmux", args...).Run()
 	}
+	for _, args := range sessionKeyBindings() {
+		exec.Command("tmux", args...).Run()
+	}
+}
+
+func sessionKeyBindings() [][]string {
+	return [][]string{
+		{"bind-key", "h", "display-popup", "-B", "-w", "90%", "-h", "80%", "-E", hiveSwitchCommand()},
+	}
+}
+
+func hiveSwitchCommand() string {
+	executable, err := os.Executable()
+	if err != nil {
+		executable = "hive"
+	}
+	return shellQuote(executable) + " switch"
 }
 
 func sessionOptions(name string) [][]string {

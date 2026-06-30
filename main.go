@@ -58,17 +58,20 @@ Commands:
       --path <path>                 Working directory (default: .)
       --name <name>                 Session name (auto-generated if empty)
   hive attach <name>                Attach to a session
+  hive switch                       Open compact session switcher
   hive delete <name>                Delete a session
 
 Aliases:
   list   → ls
   create → new
   attach → a
+  switch → sw, s
   delete → rm
 
 TUI Keys:
   n         New session
   enter     Attach to session
+  prefix+h  Open switcher from inside tmux
   d         Delete session
   /         Search sessions
   t         Switch theme
