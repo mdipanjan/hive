@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/session"
 	"github.com/mdipanjan/hive/internal/styles"
 )
 
@@ -29,24 +30,21 @@ func RenderView(m Model) string {
 
 func renderDeleteConfirmView(m Model) string {
 	sessionName := ""
+	attached := false
 	if len(m.sessions) > 0 {
-		sessionName = m.sessions[m.cursor].Name
+		s := m.sessions[m.cursor]
+		sessionName = s.Name
+		attached = s.Status == session.StatusActive
 	}
 
-	popup := components.RenderDeleteConfirm(sessionName, m.deleteButton)
-	help := components.RenderHelpBar([]components.HelpItem{
+	dialog := components.RenderDeleteConfirm(sessionName, attached, m.deleteButton)
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "←→", Desc: "select"},
-		{Key: "enter", Desc: "confirm"},
+		{Key: "⏎", Desc: "confirm"},
 		{Key: "y", Desc: "yes"},
 		{Key: "n/esc", Desc: "cancel"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	return renderChrome(m, dialog, footer)
 }
 
 func renderHelpView(m Model) string {

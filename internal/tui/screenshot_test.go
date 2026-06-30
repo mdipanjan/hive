@@ -99,7 +99,7 @@ func TestGenerateScreenshots(t *testing.T) {
 		}},
 		{"06-delete-confirm", func() Model {
 			m := base()
-			m.cursor = 1
+			m.cursor = 0 // hive-dev is attached -> shows the warning
 			m.app.ConfirmDelete()
 			m.deleteButton = 1
 			return m
