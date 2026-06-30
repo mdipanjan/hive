@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mdipanjan/hive/internal/components"
@@ -34,12 +33,13 @@ type Model struct {
 	searchCursor    int
 	deleteButton    int
 	cpuUsageHistory []int
+	memUsageHistory []int
 	err             error
 }
 
 type NewSessionForm struct {
 	Tool       int
-	FilePicker filepicker.Model
+	FilePicker dirPicker
 	Path       string
 	Name       string
 	Focus      int
@@ -146,11 +146,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateList(msg)
 
 	case cpuTickMsg:
-		cpuValue := components.GetCPUPercent()
-		m.cpuUsageHistory = append(m.cpuUsageHistory, cpuValue)
-		if len(m.cpuUsageHistory) > 60 {
-			m.cpuUsageHistory = m.cpuUsageHistory[1:]
-		}
+		m.cpuUsageHistory = appendCapped(m.cpuUsageHistory, components.GetCPUPercent(), 60)
+		m.memUsageHistory = appendCapped(m.memUsageHistory, components.GetMemPercent(), 60)
 		return m, cpuTick()
 	}
 	return m, nil

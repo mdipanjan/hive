@@ -5,6 +5,7 @@ import "github.com/charmbracelet/lipgloss"
 var (
 	ColorGreen  lipgloss.Color
 	ColorYellow lipgloss.Color
+	ColorRed    lipgloss.Color
 	ColorGray   lipgloss.Color
 	ColorCyan   lipgloss.Color
 	ColorWhite  lipgloss.Color
@@ -41,6 +42,7 @@ var (
 func ApplyTheme(t Theme) {
 	ColorGreen = t.Green
 	ColorYellow = t.Yellow
+	ColorRed = t.Red
 	ColorGray = t.Gray
 	ColorCyan = t.Cyan
 	ColorWhite = t.White
@@ -48,12 +50,14 @@ func ApplyTheme(t Theme) {
 	ColorBg = t.Bg
 	ColorBgDark = t.BgDark
 
-	IconActive = lipgloss.NewStyle().Foreground(ColorGreen).Render("●")
-	IconRunning = lipgloss.NewStyle().Foreground(ColorYellow).Render("◐")
-	IconReady = lipgloss.NewStyle().Foreground(ColorCyan).Render("◌")
-	IconCompleted = lipgloss.NewStyle().Foreground(ColorGreen).Render("✓")
-	IconFailed = lipgloss.NewStyle().Foreground(ColorYellow).Render("✕")
-	IconIdle = lipgloss.NewStyle().Foreground(ColorGray).Render("○")
+	// Status vocabulary (DESIGN.md §2.3): shape disambiguates the two greens,
+	// and every glyph keeps a consistent color across all screens.
+	IconActive = lipgloss.NewStyle().Foreground(ColorGreen).Render("●")    // attached
+	IconRunning = lipgloss.NewStyle().Foreground(ColorYellow).Render("■")  // detached
+	IconReady = lipgloss.NewStyle().Foreground(ColorCyan).Render("◌")      // idle
+	IconCompleted = lipgloss.NewStyle().Foreground(ColorGreen).Render("✓") // done
+	IconFailed = lipgloss.NewStyle().Foreground(ColorRed).Render("✗")      // dead
+	IconIdle = lipgloss.NewStyle().Foreground(ColorCyan).Render("◌")
 
 	OuterBox = lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
@@ -77,8 +81,11 @@ func ApplyTheme(t Theme) {
 	Normal = lipgloss.NewStyle().
 		Foreground(ColorWhite)
 
+	// Dim is the muted-TEXT role. It uses ColorGray (readable on every theme),
+	// not ColorDim — ColorDim is reserved for fills/selection backgrounds, and
+	// on some themes (e.g. Solarized) it is nearly identical to the background.
 	Dim = lipgloss.NewStyle().
-		Foreground(ColorDim)
+		Foreground(ColorGray)
 
 	Logo = lipgloss.NewStyle().
 		Foreground(ColorCyan).

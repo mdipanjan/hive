@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/components"
+	"github.com/mdipanjan/hive/internal/session"
 	"github.com/mdipanjan/hive/internal/styles"
 )
 
@@ -29,56 +30,41 @@ func RenderView(m Model) string {
 
 func renderDeleteConfirmView(m Model) string {
 	sessionName := ""
+	attached := false
 	if len(m.sessions) > 0 {
-		sessionName = m.sessions[m.cursor].Name
+		s := m.sessions[m.cursor]
+		sessionName = s.Name
+		attached = s.Status == session.StatusActive
 	}
 
-	popup := components.RenderDeleteConfirm(sessionName, m.deleteButton)
-	help := components.RenderHelpBar([]components.HelpItem{
+	dialog := components.RenderDeleteConfirm(sessionName, attached, m.deleteButton)
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "←→", Desc: "select"},
-		{Key: "enter", Desc: "confirm"},
+		{Key: "⏎", Desc: "confirm"},
 		{Key: "y", Desc: "yes"},
 		{Key: "n/esc", Desc: "cancel"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	return renderChrome(m, dialog, footer)
 }
 
 func renderHelpView(m Model) string {
 	popup := components.RenderHelpPopup()
-	help := components.RenderHelp()
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	footer := components.RenderHints([]components.HelpItem{
+		{Key: "?", Desc: "close"},
+		{Key: "esc", Desc: "close"},
+	})
+	return renderChrome(m, popup, footer)
 }
 
 func renderFilePickerView(m Model) string {
-	title := styles.PanelTitle.Render("SELECT DIRECTORY") + "\n\n"
-	picker := m.form.FilePicker.View()
-
-	panelStyle := styles.Panel.Width(50).Padding(1, 2)
-	panel := panelStyle.Render(title + picker)
-	help := components.RenderHelpBar([]components.HelpItem{
+	picker := m.form.FilePicker.view()
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "↑↓", Desc: "navigate"},
-		{Key: "enter", Desc: "select"},
+		{Key: "→", Desc: "open"},
+		{Key: "⏎", Desc: "select"},
 		{Key: "esc", Desc: "cancel"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		panel = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, panel)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return panel + "\n" + help
+	return renderChrome(m, picker, footer)
 }
 
 func renderSearchView(m Model) string {
@@ -90,65 +76,66 @@ func renderSearchView(m Model) string {
 	}
 
 	popup := components.RenderSearchPopupTitled(title, m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
-	help := components.RenderHelpBar([]components.HelpItem{
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "↑↓", Desc: "select"},
-		{Key: "enter", Desc: action},
+		{Key: "⏎", Desc: action},
 		{Key: "esc", Desc: "close"},
 	})
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	return renderChrome(m, popup, footer)
 }
 func renderListView(m Model) string {
-	leftColumn := lipgloss.JoinVertical(lipgloss.Left,
-		components.RenderLogo(),
-		"",
-		components.RenderHoneycomb(3, 3),
-		"",
-		components.RenderStats(m.sessions),
-	)
-
-	var rightColumn string
 	cursor := m.cursor
 	if cursor >= len(m.sessions) {
 		cursor = max(0, len(m.sessions)-1)
 	}
 
+	subtitle := styles.Dim.Render("session manager · v" + components.Version)
+	leftColumn := lipgloss.JoinVertical(lipgloss.Left,
+		components.RenderLogo(),
+		"",
+		subtitle,
+		"",
+		"",
+		components.RenderStats(m.sessions),
+	)
+
+	var rightColumn string
 	if len(m.sessions) > 0 {
 		rightColumn = lipgloss.JoinVertical(lipgloss.Left,
 			components.RenderSessions(m.sessions, cursor),
+			"",
 			components.RenderDetails(m.sessions[cursor]),
 		)
 	} else {
 		rightColumn = components.RenderSessions(m.sessions, cursor)
 	}
 
-	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftColumn, "  ", rightColumn)
+	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftColumn, "    ", rightColumn)
 
-	contentWidth := maxLineWidth(mainContent)
-	boxWidth := contentWidth + 6
+	activity := components.RenderActivity(m.cpuUsageHistory, m.memUsageHistory)
+	footer := components.RenderHelp()
 
+	fullContent := lipgloss.JoinVertical(lipgloss.Left,
+		components.RenderTitleBar(),
+		"",
+		mainContent,
+		"",
+		activity,
+		"",
+		footer,
+	)
+
+	boxWidth := maxLineWidth(fullContent) + 6
 	if m.width > 0 && boxWidth > m.width-2 {
 		boxWidth = m.width - 2
 	}
 
-	activity := components.RenderActivity(contentWidth, m.cpuUsageHistory)
-	fullContent := lipgloss.JoinVertical(lipgloss.Right, mainContent, "", activity)
-
-	boxStyle := styles.OuterBox.Width(boxWidth)
-	box := boxStyle.Render(fullContent)
-
-	help := components.RenderHelp()
+	box := styles.OuterBox.Width(boxWidth).Render(fullContent)
 	if m.width > 0 && m.height > 0 {
-		box = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, box)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+		box = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
 	}
 
-	return box + "\n" + help
+	return box
 }
 
 func renderNewView(m Model) string {
@@ -161,19 +148,39 @@ func renderNewView(m Model) string {
 	}
 
 	dialog := components.RenderNewDialog(Tools, formData)
-	help := components.RenderHelpBar([]components.HelpItem{
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "tab", Desc: "next"},
 		{Key: "←→", Desc: "select"},
-		{Key: "enter", Desc: "confirm"},
+		{Key: "⏎", Desc: "confirm"},
 		{Key: "esc", Desc: "cancel"},
 	})
+	return renderChrome(m, dialog, footer)
+}
 
-	if m.width > 0 && m.height > 0 {
-		dialog = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, dialog)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+// renderChrome wraps a centered body in the shared window frame: faux title bar
+// at the top, the body vertically centered, and a footer hint bar at the bottom
+// (DESIGN.md §4). Used by modal screens so they match the dashboard chrome.
+func renderChrome(m Model, body, footer string) string {
+	if m.width <= 0 || m.height <= 0 {
+		return body + "\n\n" + footer
 	}
 
-	return dialog + "\n" + help
+	boxW := m.width - 2
+	boxH := m.height - 2
+	innerW := boxW - 2 - 4 // border + padding(1,2)
+	innerH := boxH - 2 - 2
+	bodyH := innerH - 2 // title line + footer line
+	if bodyH < 1 {
+		bodyH = 1
+	}
+
+	title := components.RenderTitleBar()
+	placed := lipgloss.Place(innerW, bodyH, lipgloss.Center, lipgloss.Center, body)
+	foot := lipgloss.PlaceHorizontal(innerW, lipgloss.Center, footer)
+	content := lipgloss.JoinVertical(lipgloss.Left, title, placed, foot)
+
+	box := styles.OuterBox.Width(boxW).Height(boxH).Render(content)
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
 }
 
 func maxLineWidth(s string) int {

@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/session"
 	"github.com/mdipanjan/hive/internal/styles"
 )
@@ -13,7 +14,9 @@ func RenderSearchPopup(inputView string, query string, sessions []session.Sessio
 
 func RenderSearchPopupTitled(titleText, inputView, query string, sessions []session.Session, results []int, cursor int) string {
 	title := styles.PanelTitle.Render(titleText)
-	input := "› " + inputView
+	// Single prompt marker only (DESIGN.md §4.2): the textinput already renders
+	// its own "❯ " prompt, so don't prepend another.
+	input := inputView
 
 	maxResults := 6
 	var resultsList string
@@ -28,15 +31,13 @@ func RenderSearchPopupTitled(titleText, inputView, query string, sessions []sess
 			if i < len(results) {
 				idx := results[i]
 				name := TruncateMiddle(sessions[idx].Name, 28)
-				icon := GetStatusIcon(sessions[idx].Status)
-				line := icon + " " + name
+				icon := GetStatusIcon(sessions[idx].Status) // real status glyph, always
 
+				nameStyled := styles.Normal.Render(name)
 				if i == cursor {
-					line = styles.Logo.Render("● " + name)
-				} else {
-					line = styles.Normal.Render(line)
+					nameStyled = lipgloss.NewStyle().Foreground(styles.ColorCyan).Bold(true).Render(name)
 				}
-				resultsList += line + "\n"
+				resultsList += icon + " " + nameStyled + "\n"
 			} else {
 				resultsList += "\n"
 			}
