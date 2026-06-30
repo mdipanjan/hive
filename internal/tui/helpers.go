@@ -29,6 +29,14 @@ func getDefaultPath() string {
 	return dir
 }
 
+func appendCapped(history []int, value, capacity int) []int {
+	history = append(history, value)
+	if len(history) > capacity {
+		history = history[len(history)-capacity:]
+	}
+	return history
+}
+
 func cpuTick() tea.Cmd {
 	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
 		return cpuTickMsg(t)

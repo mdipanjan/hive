@@ -57,7 +57,7 @@ This is the load-bearing convention. **One state vocabulary, identical across ev
 | State      | Glyph | Color    | Meaning                         |
 | ---------- | :---: | -------- | ------------------------------- |
 | `attached` |  `●`  | `green`  | Currently attached / foreground |
-| `detached` |  `◼`  | `yellow` | Alive and running, not attached |
+| `detached` |  `■`  | `yellow` | Alive and running, not attached |
 | `idle`     |  `◌`  | `blue`   | Exists, no recent activity      |
 | `done`     |  `✓`  | `green`  | Exited cleanly / task complete  |
 | `dead`     |  `✗`  | `red`    | Exited with error               |

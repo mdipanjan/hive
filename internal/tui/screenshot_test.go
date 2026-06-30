@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mdipanjan/hive/internal/components"
 	"github.com/mdipanjan/hive/internal/session"
 	"github.com/mdipanjan/hive/internal/styles"
 	"github.com/muesli/termenv"
@@ -28,6 +29,7 @@ func TestGenerateScreenshots(t *testing.T) {
 	// lipgloss strips all theme colors (monochrome output).
 	lipgloss.SetColorProfile(termenv.TrueColor)
 	styles.ApplyTheme(styles.GetThemeByKey("tokyo-night"))
+	components.Version = "0.1"
 
 	outDir := filepath.Join("..", "..", "screenshots")
 	if err := os.MkdirAll(outDir, 0o755); err != nil {
@@ -51,6 +53,7 @@ func TestGenerateScreenshots(t *testing.T) {
 			cursor:          0,
 			app:             NewAppState(),
 			cpuUsageHistory: []int{4, 9, 12, 7, 18, 22, 15, 30, 24, 19, 11, 8, 14, 26, 33, 20},
+			memUsageHistory: []int{38, 40, 39, 42, 41, 44, 43, 45, 42, 40, 41, 43, 44, 42, 41, 41},
 		}
 	}
 

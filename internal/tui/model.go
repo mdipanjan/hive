@@ -34,6 +34,7 @@ type Model struct {
 	searchCursor    int
 	deleteButton    int
 	cpuUsageHistory []int
+	memUsageHistory []int
 	err             error
 }
 
@@ -146,11 +147,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateList(msg)
 
 	case cpuTickMsg:
-		cpuValue := components.GetCPUPercent()
-		m.cpuUsageHistory = append(m.cpuUsageHistory, cpuValue)
-		if len(m.cpuUsageHistory) > 60 {
-			m.cpuUsageHistory = m.cpuUsageHistory[1:]
-		}
+		m.cpuUsageHistory = appendCapped(m.cpuUsageHistory, components.GetCPUPercent(), 60)
+		m.memUsageHistory = appendCapped(m.memUsageHistory, components.GetMemPercent(), 60)
 		return m, cpuTick()
 	}
 	return m, nil

@@ -104,51 +104,58 @@ func renderSearchView(m Model) string {
 	return popup + "\n" + help
 }
 func renderListView(m Model) string {
-	leftColumn := lipgloss.JoinVertical(lipgloss.Left,
-		components.RenderLogo(),
-		"",
-		components.RenderHoneycomb(3, 3),
-		"",
-		components.RenderStats(m.sessions),
-	)
-
-	var rightColumn string
 	cursor := m.cursor
 	if cursor >= len(m.sessions) {
 		cursor = max(0, len(m.sessions)-1)
 	}
 
+	subtitle := styles.Dim.Render("session manager · v" + components.Version)
+	leftColumn := lipgloss.JoinVertical(lipgloss.Left,
+		components.RenderLogo(),
+		"",
+		subtitle,
+		"",
+		"",
+		components.RenderStats(m.sessions),
+	)
+
+	var rightColumn string
 	if len(m.sessions) > 0 {
 		rightColumn = lipgloss.JoinVertical(lipgloss.Left,
 			components.RenderSessions(m.sessions, cursor),
+			"",
 			components.RenderDetails(m.sessions[cursor]),
 		)
 	} else {
 		rightColumn = components.RenderSessions(m.sessions, cursor)
 	}
 
-	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftColumn, "  ", rightColumn)
+	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, leftColumn, "    ", rightColumn)
 
-	contentWidth := maxLineWidth(mainContent)
-	boxWidth := contentWidth + 6
+	activity := components.RenderActivity(m.cpuUsageHistory, m.memUsageHistory)
+	footer := components.RenderHelp()
 
+	fullContent := lipgloss.JoinVertical(lipgloss.Left,
+		components.RenderTitleBar(),
+		"",
+		mainContent,
+		"",
+		activity,
+		"",
+		footer,
+	)
+
+	boxWidth := maxLineWidth(fullContent) + 6
 	if m.width > 0 && boxWidth > m.width-2 {
 		boxWidth = m.width - 2
 	}
 
-	activity := components.RenderActivity(contentWidth, m.cpuUsageHistory)
-	fullContent := lipgloss.JoinVertical(lipgloss.Right, mainContent, "", activity)
-
-	boxStyle := styles.OuterBox.Width(boxWidth)
-	box := boxStyle.Render(fullContent)
-
-	help := components.RenderHelp()
+	box := styles.OuterBox.Width(boxWidth).Render(fullContent)
 	if m.width > 0 && m.height > 0 {
-		box = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, box)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+		box = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
 	}
 
-	return box + "\n" + help
+	return box
 }
 
 func renderNewView(m Model) string {
