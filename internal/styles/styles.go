@@ -81,8 +81,11 @@ func ApplyTheme(t Theme) {
 	Normal = lipgloss.NewStyle().
 		Foreground(ColorWhite)
 
+	// Dim is the muted-TEXT role. It uses ColorGray (readable on every theme),
+	// not ColorDim — ColorDim is reserved for fills/selection backgrounds, and
+	// on some themes (e.g. Solarized) it is nearly identical to the background.
 	Dim = lipgloss.NewStyle().
-		Foreground(ColorDim)
+		Foreground(ColorGray)
 
 	Logo = lipgloss.NewStyle().
 		Foreground(ColorCyan).
