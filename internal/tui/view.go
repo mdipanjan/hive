@@ -168,19 +168,39 @@ func renderNewView(m Model) string {
 	}
 
 	dialog := components.RenderNewDialog(Tools, formData)
-	help := components.RenderHelpBar([]components.HelpItem{
+	footer := components.RenderHints([]components.HelpItem{
 		{Key: "tab", Desc: "next"},
 		{Key: "←→", Desc: "select"},
-		{Key: "enter", Desc: "confirm"},
+		{Key: "⏎", Desc: "confirm"},
 		{Key: "esc", Desc: "cancel"},
 	})
+	return renderChrome(m, dialog, footer)
+}
 
-	if m.width > 0 && m.height > 0 {
-		dialog = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, dialog)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
+// renderChrome wraps a centered body in the shared window frame: faux title bar
+// at the top, the body vertically centered, and a footer hint bar at the bottom
+// (DESIGN.md §4). Used by modal screens so they match the dashboard chrome.
+func renderChrome(m Model, body, footer string) string {
+	if m.width <= 0 || m.height <= 0 {
+		return body + "\n\n" + footer
 	}
 
-	return dialog + "\n" + help
+	boxW := m.width - 2
+	boxH := m.height - 2
+	innerW := boxW - 2 - 4 // border + padding(1,2)
+	innerH := boxH - 2 - 2
+	bodyH := innerH - 2 // title line + footer line
+	if bodyH < 1 {
+		bodyH = 1
+	}
+
+	title := components.RenderTitleBar()
+	placed := lipgloss.Place(innerW, bodyH, lipgloss.Center, lipgloss.Center, body)
+	foot := lipgloss.PlaceHorizontal(innerW, lipgloss.Center, footer)
+	content := lipgloss.JoinVertical(lipgloss.Left, title, placed, foot)
+
+	box := styles.OuterBox.Width(boxW).Height(boxH).Render(content)
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
 }
 
 func maxLineWidth(s string) int {

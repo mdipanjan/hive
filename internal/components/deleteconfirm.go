@@ -7,7 +7,11 @@ import (
 func RenderDeleteConfirm(sessionName string, selectedButton int) string {
 	title := styles.PanelTitle.Render("DELETE SESSION")
 	message := styles.Normal.Render("Delete \"" + sessionName + "\"?")
-	buttons := RenderButtons([]string{"Yes", "No"}, selectedButton, true, 40)
+	var opts []ButtonOption
+	if selectedButton == 0 {
+		opts = append(opts, Destructive())
+	}
+	buttons := RenderButtons([]string{"Yes", "No"}, selectedButton, true, opts...)
 
 	content := title + "\n\n" + message + "\n\n" + buttons
 
