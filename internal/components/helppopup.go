@@ -8,31 +8,31 @@ import (
 )
 
 // RenderHelpPopup draws the keybinding reference, grouped by category for
-// scannability (DESIGN.md §4.7).
+// scannability, with a branding/close footer line (DESIGN.md §4.7).
 func RenderHelpPopup() string {
-	title := styles.PanelTitle.Render("HELP")
+	const inner = 50 - 2 - 4
 
-	keyStyle := lipgloss.NewStyle().Foreground(styles.ColorCyan).Width(10)
+	title := styles.PanelTitle.Render("HELP")
+	keyStyle := lipgloss.NewStyle().Foreground(styles.ColorCyan).Width(14)
 	descStyle := lipgloss.NewStyle().Foreground(styles.ColorWhite)
-	groupStyle := styles.Dim
+	groupStyle := lipgloss.NewStyle().Foreground(styles.ColorGray)
 
 	type binding struct{ key, desc string }
 	groups := []struct {
 		name     string
 		bindings []binding
 	}{
-		{"navigation", []binding{
+		{"NAVIGATION", []binding{
 			{"↑/k", "Move up"},
 			{"↓/j", "Move down"},
-			{"/", "Search sessions"},
 		}},
-		{"actions", []binding{
+		{"ACTIONS", []binding{
 			{"n", "Create new session"},
 			{"enter", "Attach to session"},
 			{"d", "Delete session"},
 			{"t", "Switch theme"},
 		}},
-		{"global", []binding{
+		{"GLOBAL", []binding{
 			{"?", "Toggle this help"},
 			{"q", "Quit"},
 		}},
@@ -40,13 +40,16 @@ func RenderHelpPopup() string {
 
 	var sections []string
 	for _, g := range groups {
-		lines := []string{groupStyle.Render("  " + g.name)}
+		lines := []string{groupStyle.Render(g.name)}
 		for _, b := range g.bindings {
-			lines = append(lines, "    "+keyStyle.Render(b.key)+descStyle.Render(b.desc))
+			lines = append(lines, keyStyle.Render(b.key)+descStyle.Render(b.desc))
 		}
 		sections = append(sections, strings.Join(lines, "\n"))
 	}
 
-	body := title + "\n\n" + strings.Join(sections, "\n\n")
-	return styles.Panel.Width(44).Padding(1, 2).Render(body)
+	divider := styles.Dim.Render(strings.Repeat("─", inner))
+	footer := styles.Dim.Render("hive v" + Version + " · press ? or esc to close")
+
+	body := title + "\n\n" + strings.Join(sections, "\n\n") + "\n\n" + divider + "\n\n" + footer
+	return styles.Panel.Width(50).Padding(1, 2).Render(body)
 }
