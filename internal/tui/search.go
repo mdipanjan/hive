@@ -11,6 +11,9 @@ import (
 func (m Model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "esc":
+		if m.mode == ModeSwitch {
+			return m, tea.Quit
+		}
 		m.app.CloseOverlay()
 		return m, nil
 

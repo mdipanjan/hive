@@ -6,8 +6,12 @@ import (
 	"fmt"
 	"os"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mdipanjan/hive/internal/config"
 	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/runner"
+	"github.com/mdipanjan/hive/internal/styles"
+	"github.com/mdipanjan/hive/internal/tui"
 )
 
 type SessionOutput struct {
@@ -31,6 +35,8 @@ func Run(args []string) bool {
 		return runAttach(args[2:])
 	case "delete", "rm":
 		return runDelete(args[2:])
+	case "switch", "sw", "s":
+		return runSwitch(args[2:])
 	case "run-session":
 		return runSession(args[2:])
 	}
@@ -127,6 +133,22 @@ func runDelete(args []string) bool {
 	}
 
 	fmt.Printf("Deleted session: %s\n", name)
+	return true
+}
+
+func runSwitch(args []string) bool {
+	fs := flag.NewFlagSet("switch", flag.ExitOnError)
+	fs.Parse(args)
+
+	cfg := config.Load()
+	styles.ApplyTheme(styles.GetThemeByKey(cfg.Theme))
+
+	p := tea.NewProgram(tui.NewSwitch(), tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
 	return true
 }
 

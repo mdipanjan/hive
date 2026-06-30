@@ -8,7 +8,11 @@ import (
 )
 
 func RenderSearchPopup(inputView string, query string, sessions []session.Session, results []int, cursor int) string {
-	title := styles.PanelTitle.Render("SEARCH")
+	return RenderSearchPopupTitled("SEARCH", inputView, query, sessions, results, cursor)
+}
+
+func RenderSearchPopupTitled(titleText, inputView, query string, sessions []session.Session, results []int, cursor int) string {
+	title := styles.PanelTitle.Render(titleText)
 	input := "› " + inputView
 
 	maxResults := 6

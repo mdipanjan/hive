@@ -3,7 +3,6 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mdipanjan/hive/internal/config"
 	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
@@ -51,13 +50,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.app.ShowHelp()
 
 	case "/":
-		m.searchInput = textinput.New()
-		m.searchInput.Placeholder = "Search..."
-		m.searchInput.Focus()
-		m.searchInput.CharLimit = 30
-		m.searchInput.Width = 30
-		m.searchInput.PromptStyle = lipgloss.NewStyle().Foreground(styles.ColorCyan)
-		m.searchInput.TextStyle = lipgloss.NewStyle().Foreground(styles.ColorWhite)
+		m.searchInput = newSearchInput()
 		m.app.Search()
 		m.searchResults = m.getIndices("")
 		m.searchCursor = 0

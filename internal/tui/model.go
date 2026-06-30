@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"os"
 	"time"
 
 	"github.com/charmbracelet/bubbles/filepicker"
@@ -10,9 +11,18 @@ import (
 	"github.com/mdipanjan/hive/internal/lifecycle"
 	"github.com/mdipanjan/hive/internal/logger"
 	"github.com/mdipanjan/hive/internal/session"
+	"golang.org/x/term"
+)
+
+type Mode string
+
+const (
+	ModeDashboard Mode = "dashboard"
+	ModeSwitch    Mode = "switch"
 )
 
 type Model struct {
+	mode            Mode
 	width           int
 	height          int
 	sessions        []session.Session
@@ -40,22 +50,48 @@ type cpuTickMsg time.Time
 type sessionAttachedMsg struct{ err error }
 
 func New() Model {
-	logger.Log.Debug("initializing model")
+	return newModel(ModeDashboard)
+}
+
+func NewSwitch() Model {
+	return newModel(ModeSwitch)
+}
+
+func newModel(mode Mode) Model {
+	logger.Log.Debug("initializing model", "mode", mode)
 	sessions, err := lifecycle.New().List()
 	if err != nil {
 		logger.Log.Error("failed to list sessions", "err", err)
 	}
 	logger.Log.Debug("found sessions", "count", len(sessions))
 
-	return Model{
+	m := Model{
+		mode:     mode,
 		sessions: sessions,
 		cursor:   0,
 		app:      NewAppState(),
 		err:      err,
 	}
+
+	if w, h, sizeErr := term.GetSize(int(os.Stdout.Fd())); sizeErr == nil && w > 0 && h > 0 {
+		m.width = w
+		m.height = h
+	}
+
+	if mode == ModeSwitch {
+		m.searchInput = newSearchInput()
+		m.app.Search()
+		m.searchResults = m.getIndices("")
+		m.searchCursor = 0
+	}
+
+	return m
 }
 
 func (m Model) Init() tea.Cmd {
+	if m.mode == ModeSwitch {
+		return textinput.Blink
+	}
 	return cpuTick()
 }
 
@@ -75,6 +111,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case sessionAttachedMsg:
 		logger.Log.Debug("returned from attach", "err", msg.err)
+		if m.mode == ModeSwitch {
+			m.err = msg.err
+			if msg.err != nil {
+				return m, nil
+			}
+			return m, tea.Quit
+		}
 		sessions, _ := lifecycle.New().List()
 		m.sessions = sessions
 		return m, tea.ClearScreen

@@ -82,10 +82,17 @@ func renderFilePickerView(m Model) string {
 }
 
 func renderSearchView(m Model) string {
-	popup := components.RenderSearchPopup(m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
+	title := "SEARCH"
+	action := "attach"
+	if m.mode == ModeSwitch {
+		title = "SWITCH SESSION"
+		action = "switch"
+	}
+
+	popup := components.RenderSearchPopupTitled(title, m.searchInput.View(), m.searchInput.Value(), m.sessions, m.searchResults, m.searchCursor)
 	help := components.RenderHelpBar([]components.HelpItem{
 		{Key: "↑↓", Desc: "select"},
-		{Key: "enter", Desc: "attach"},
+		{Key: "enter", Desc: action},
 		{Key: "esc", Desc: "close"},
 	})
 
