@@ -49,14 +49,11 @@ func renderDeleteConfirmView(m Model) string {
 
 func renderHelpView(m Model) string {
 	popup := components.RenderHelpPopup()
-	help := components.RenderHelp()
-
-	if m.width > 0 && m.height > 0 {
-		popup = lipgloss.Place(m.width, m.height-2, lipgloss.Center, lipgloss.Center, popup)
-		help = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, help)
-	}
-
-	return popup + "\n" + help
+	footer := components.RenderHints([]components.HelpItem{
+		{Key: "?", Desc: "close"},
+		{Key: "esc", Desc: "close"},
+	})
+	return renderChrome(m, popup, footer)
 }
 
 func renderFilePickerView(m Model) string {
